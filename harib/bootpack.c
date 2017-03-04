@@ -8,7 +8,9 @@ void init_palette(void);
 void init_screen(char* vram,short xsize,short ysize);
 void set_palette(int start, int end, unsigned char *rgb);
 void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
-void putfont16(char *vram, int xsize, int x, int y, char color, char *font);
+void putfont8(char *vram, int xsize, int x, int y, char color, char *font);
+void putfonts8_asc(char *vram,int xsize,int x,int y,char c,unsigned char *s);
+//void putfont16(char *vram, int xsize, int x, int y, char color, char *font);
 
 #define COL8_000000		0
 #define COL8_FF0000		1
@@ -32,20 +34,24 @@ struct BOOTINFO{
 	short scrnx,scrny;
 	char *vram;
 };
-
+/*
 static char font_HA[32]={
 	0x08,0x18,0x08,0x18,0x08,0x28,0x7E,0x24,0x4A,0x43,0x4B,0x81,0x4A,0x7E,0x4A,0x00,
 	0x7E,0x7F,0x08,0x41,0x0A,0x41,0x0F,0x41,0x70,0x7F,0x00,0x41,0x00,0x00,0x00,0x00
-};
+};*/
 
 void HariMain(void)
 {
 	struct BOOTINFO *binfo=(struct BOOTINFO *)0x0ff0;
 	init_palette();
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
-	putfont16(binfo->vram,binfo->scrnx,100,100,COL8_FFFFFF,font_HA);
-	putfont16(binfo->vram,binfo->scrnx,116,100,COL8_FFFFFF,font_HA);
-
+	//putfont16(binfo->vram,binfo->scrnx,100,100,COL8_FFFFFF,font_HA);
+	//putfont16(binfo->vram,binfo->scrnx,116,100,COL8_FFFFFF,font_HA);
+	
+	putfonts8_asc(binfo->vram,binfo->scrnx,8,8,COL8_FFFFFF,"ABC 123");
+	putfonts8_asc(binfo->vram,binfo->scrnx,31,31,COL8_000000,"Project OS.");
+	putfonts8_asc(binfo->vram,binfo->scrnx,30,30,COL8_FFFFFF,"Project OS.");
+	
 	for (;;) {
 		io_hlt();
 	}
@@ -123,6 +129,31 @@ void init_screen(char* vram,short xsize,short ysize){
 	boxfill8(vram, xsize, COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
 }
 
+void putfont8(char *vram, int xsize, int x, int y, char color, char *font){
+	int i;
+	char *p, d;
+	for(i=0;i<16;i++){
+		p=vram+(y+i)*xsize+x;
+		d=font[i];
+		if((d&0x80)!=0){p[0]=color;};
+		if((d&0x40)!=0){p[1]=color;};
+		if((d&0x20)!=0){p[2]=color;};
+		if((d&0x10)!=0){p[3]=color;};
+		if((d&0x08)!=0){p[4]=color;};
+		if((d&0x04)!=0){p[5]=color;};
+		if((d&0x02)!=0){p[6]=color;};
+		if((d&0x01)!=0){p[7]=color;};
+	}
+}
+
+void putfonts8_asc(char *vram,int xsize,int x,int y,char c,unsigned char *s){
+	extern char hankaku[4096];
+	for(;*s!=0x00;s++){
+		putfont8(vram,xsize,x,y,c,hankaku+*s*16);
+		x+=8;
+	}
+}
+/*
 void putfont16(char *vram, int xsize, int x, int y, char color, char *font){
 	int i;
 	char *p, d;
@@ -147,4 +178,4 @@ void putfont16(char *vram, int xsize, int x, int y, char color, char *font){
 		if((d&0x02)!=0){p[14]=color;};
 		if((d&0x01)!=0){p[15]=color;};
 	}
-}
+}*/

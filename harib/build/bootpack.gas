@@ -1,38 +1,9 @@
 	.file	"bootpack.c"
 	.data
-_font_HA:
-	.byte	8
-	.byte	24
-	.byte	8
-	.byte	24
-	.byte	8
-	.byte	40
-	.byte	126
-	.byte	36
-	.byte	74
-	.byte	67
-	.byte	75
-	.byte	-127
-	.byte	74
-	.byte	126
-	.byte	74
-	.byte	0
-	.byte	126
-	.byte	127
-	.byte	8
-	.byte	65
-	.byte	10
-	.byte	65
-	.byte	15
-	.byte	65
-	.byte	112
-	.byte	127
-	.byte	0
-	.byte	65
-	.byte	0
-	.byte	0
-	.byte	0
-	.byte	0
+LC0:
+	.ascii "ABC 123\0"
+LC1:
+	.ascii "Project OS.\0"
 	.text
 	.balign 2
 .globl _HariMain
@@ -47,24 +18,32 @@ _HariMain:
 	pushl	%eax
 	pushl	4088
 	call	_init_screen
-	pushl	$_font_HA
+	pushl	$LC0
 	pushl	$7
-	pushl	$100
-	pushl	$100
+	pushl	$8
+	pushl	$8
 	movswl	4084,%eax
 	pushl	%eax
 	pushl	4088
-	call	_putfont16
+	call	_putfonts8_asc
 	addl	$36, %esp
-	pushl	$_font_HA
-	pushl	$7
-	pushl	$100
-	pushl	$116
+	pushl	$LC1
+	pushl	$0
+	pushl	$31
+	pushl	$31
 	movswl	4084,%eax
 	pushl	%eax
 	pushl	4088
-	call	_putfont16
-	addl	$24, %esp
+	call	_putfonts8_asc
+	pushl	$LC1
+	pushl	$7
+	pushl	$30
+	pushl	$30
+	movswl	4084,%eax
+	pushl	%eax
+	pushl	4088
+	call	_putfonts8_asc
+	addl	$48, %esp
 L2:
 	call	_io_hlt
 	jmp	L2
@@ -402,9 +381,9 @@ _init_screen:
 	popl	%ebp
 	ret
 	.balign 2
-.globl _putfont16
-	.def	_putfont16;	.scl	2;	.type	32;	.endef
-_putfont16:
+.globl _putfont8
+	.def	_putfont8;	.scl	2;	.type	32;	.endef
+_putfont8:
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%edi
@@ -413,14 +392,14 @@ _putfont16:
 	pushl	%ebx
 	movl	28(%ebp), %edi
 	movb	24(%ebp), %bl
-L51:
+L43:
 	movl	20(%ebp), %eax
 	movl	16(%ebp), %edx
 	addl	%esi, %eax
 	imull	12(%ebp), %eax
 	addl	8(%ebp), %eax
 	leal	(%edx,%eax), %ecx
-	movb	(%edi,%esi,2), %dl
+	movb	(%esi,%edi), %dl
 	testb	%dl, %dl
 	jns	L35
 	movb	%bl, (%ecx)
@@ -463,69 +442,65 @@ L40:
 L41:
 	andl	$1, %edx
 	testb	%dl, %dl
-	je	L42
-	movb	%bl, 7(%ecx)
-L42:
-	movb	1(%edi,%esi,2), %dl
-	testb	%dl, %dl
-	jns	L43
-	movb	%bl, 8(%ecx)
-L43:
-	movb	%dl, %al
-	andl	$64, %eax
-	testb	%al, %al
-	je	L44
-	movb	%bl, 9(%ecx)
-L44:
-	movb	%dl, %al
-	andl	$32, %eax
-	testb	%al, %al
-	je	L45
-	movb	%bl, 10(%ecx)
-L45:
-	movb	%dl, %al
-	andl	$16, %eax
-	testb	%al, %al
-	je	L46
-	movb	%bl, 11(%ecx)
-L46:
-	movb	%dl, %al
-	andl	$8, %eax
-	testb	%al, %al
-	je	L47
-	movb	%bl, 12(%ecx)
-L47:
-	movb	%dl, %al
-	andl	$4, %eax
-	testb	%al, %al
-	je	L48
-	movb	%bl, 13(%ecx)
-L48:
-	movb	%dl, %al
-	andl	$2, %eax
-	testb	%al, %al
-	je	L49
-	movb	%bl, 14(%ecx)
-L49:
-	andl	$1, %edx
-	testb	%dl, %dl
 	je	L33
-	movb	%bl, 15(%ecx)
+	movb	%bl, 7(%ecx)
 L33:
 	incl	%esi
 	cmpl	$15, %esi
-	jle	L51
+	jle	L43
 	popl	%ebx
 	popl	%esi
 	popl	%edi
 	popl	%ebp
 	ret
+	.balign 2
+.globl _putfonts8_asc
+	.def	_putfonts8_asc;	.scl	2;	.type	32;	.endef
+_putfonts8_asc:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	pushl	%eax
+	movl	28(%ebp), %ebx
+	movb	24(%ebp), %al
+	movb	%al, -13(%ebp)
+	movl	16(%ebp), %esi
+	movl	20(%ebp), %edi
+	cmpb	$0, (%ebx)
+	jne	L51
+L53:
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L51:
+	movzbl	(%ebx), %eax
+	sall	$4, %eax
+	incl	%ebx
+	addl	$_hankaku, %eax
+	pushl	%eax
+	movsbl	-13(%ebp),%eax
+	pushl	%eax
+	pushl	%edi
+	pushl	%esi
+	addl	$8, %esi
+	pushl	12(%ebp)
+	pushl	8(%ebp)
+	call	_putfont8
+	addl	$24, %esp
+	cmpb	$0, (%ebx)
+	jne	L51
+	jmp	L53
 	.def	_io_store_eflags;	.scl	2;	.type	32;	.endef
 	.def	_io_out8;	.scl	2;	.type	32;	.endef
 	.def	_io_cli;	.scl	2;	.type	32;	.endef
 	.def	_io_load_eflags;	.scl	2;	.type	32;	.endef
 	.def	_set_palette;	.scl	2;	.type	32;	.endef
 	.def	_io_hlt;	.scl	2;	.type	32;	.endef
-	.def	_putfont16;	.scl	2;	.type	32;	.endef
+	.def	_putfonts8_asc;	.scl	2;	.type	32;	.endef
 	.def	_init_screen;	.scl	2;	.type	32;	.endef
 	.def	_init_palette;	.scl	2;	.type	32;	.endef
