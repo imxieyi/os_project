@@ -60,4 +60,4 @@ Temporary Items
 *.bim
 *.sys
 *.gas
-bootpack.nas
+harib/build/*.nas
