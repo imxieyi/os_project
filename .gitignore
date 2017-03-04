@@ -46,5 +46,17 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Vmware
 *.log
 *.lck
+*.vmem
+
+# Intermediate files
+*.hrb
+*.lst
+*.map
+*.obj
+*.bin
+*.bim
+*.sys
+bootpack.nas
