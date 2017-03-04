@@ -59,4 +59,5 @@ Temporary Items
 *.bin
 *.bim
 *.sys
+*.gas
 bootpack.nas
