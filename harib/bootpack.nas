@@ -3,11 +3,21 @@
 [OPTIMIZE 1]
 [OPTION 1]
 [BITS 32]
+	EXTERN	_io_hlt
 [FILE "bootpack.c"]
 [SECTION .text]
 	GLOBAL	_HariMain
 _HariMain:
 	PUSH	EBP
+	XOR	EDX,EDX
 	MOV	EBP,ESP
-L2:
-	JMP	L2
+L6:
+	MOV	AL,DL
+	AND	EAX,15
+	MOV	BYTE [655360+EDX],AL
+	INC	EDX
+	CMP	EDX,65535
+	JLE	L6
+L10:
+	CALL	_io_hlt
+	JMP	L10

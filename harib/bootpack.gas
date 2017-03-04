@@ -5,6 +5,16 @@
 	.def	_HariMain;	.scl	2;	.type	32;	.endef
 _HariMain:
 	pushl	%ebp
+	xorl	%edx, %edx
 	movl	%esp, %ebp
-L2:
-	jmp	L2
+L6:
+	movb	%dl, %al
+	andl	$15, %eax
+	movb	%al, 655360(%edx)
+	incl	%edx
+	cmpl	$65535, %edx
+	jle	L6
+L10:
+	call	_io_hlt
+	jmp	L10
+	.def	_io_hlt;	.scl	2;	.type	32;	.endef
