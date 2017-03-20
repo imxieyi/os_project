@@ -7,11 +7,11 @@ void HariMain(void)
 
 	init_gdtidt();
 	init_pic();
-	io_sti();//ˆò?CPU?¶’†’fCˆö?IDT/PIC›ß?‰n‰»
+	io_sti();//å ¯?CPU?æƒ—æ‹æŠä¸†å ´?IDT/PICæ¶?å¼¶å·’å£”
 	init_palette();
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
 	
-	putfonts8_asc(binfo->vram,binfo->scrnx,8,8,COL8_FFFFFF,"ABC 123");
+	putfonts8_asc(binfo->vram,binfo->scrnx,8,8,COL8_FFFFFF,"ABC 123 æ•»æ•»");
 	putfonts8_asc(binfo->vram,binfo->scrnx,31,31,COL8_000000,"Project OS.");
 	putfonts8_asc(binfo->vram,binfo->scrnx,30,30,COL8_FFFFFF,"Project OS.");
 	
@@ -24,8 +24,8 @@ void HariMain(void)
 	init_mouse_cursor8(mcursor,COL8_008484);
 	putblock8_8(binfo->vram,binfo->scrnx,16,16,mx,my,mcursor,16);
 
-	io_out8(PIC0_IMR, 0xf9);//ˆò?PIC1˜a???¶’†’f
-	io_out8(PIC1_IMR, 0xef);//ˆò?‘l??¶’†’f
+	io_out8(PIC0_IMR, 0xf9);//å ¯?PIC1æ¦“???æƒ—æ‹æŠ
+	io_out8(PIC1_IMR, 0xef);//å ¯?æ†€??æƒ—æ‹æŠ
 	
 	for (;;) {
 		io_hlt();

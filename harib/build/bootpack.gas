@@ -1,7 +1,7 @@
 	.file	"bootpack.c"
 	.data
 LC0:
-	.ascii "ABC 123\0"
+	.ascii "ABC 123 \224\270\224\270\0"
 LC1:
 	.ascii "Project OS.\0"
 LC2:

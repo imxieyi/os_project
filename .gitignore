@@ -61,3 +61,6 @@ Temporary Items
 *.sys
 *.gas
 harib/build/*.nas
+
+# VSCode
+.vscode/
