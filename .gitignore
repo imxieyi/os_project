@@ -64,4 +64,3 @@ harib/build/*.nas
 
 # VSCode
 .vscode/
-*.stackdump
