@@ -1,4 +1,5 @@
 TOOLPATH = ../tolset/z_tools/
+TOOLPATH = ../tolset/z_tools/
 INCPATH  = ../tolset/z_tools/haribote/
 
 OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj build/gdtidt.obj build/interrupt.obj
@@ -17,12 +18,12 @@ IMGTOL   = $(TOOLPATH)imgtol.com
 COPY     = cp
 DEL      = rm
 
-# ƒfƒtƒHƒ‹ƒg“®ì
+# ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå‹•ä½œ
 
 default :
 	$(MAKE) img
 
-# ƒtƒ@ƒCƒ‹¶¬‹K‘¥
+# ãƒ•ã‚¡ã‚¤ãƒ«ç”Ÿæˆè¦å‰‡
 
 ipl.bin : ipl.nas Makefile
 	$(NASK) ipl.nas ./build/ipl.bin ./build/ipl.lst
@@ -66,7 +67,7 @@ haribote.img : ipl.bin haribote.sys Makefile
 		copy from:build/haribote.sys to:@: \
 		imgout:build/haribote.img
 
-# ƒRƒ}ƒ“ƒh
+# ã‚³ãƒãƒ³ãƒ‰
 
 img :
 	$(MAKE) haribote.img
