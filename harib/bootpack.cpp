@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "include/headers.h"
 #include "include/fifo.hpp"
+#include "include/memory.hpp"
 
 extern FIFO *keybuf;
 extern FIFO *mousebuf;
@@ -21,18 +22,19 @@ void HariMain(void)
 	unsigned char *buf_back,buf_mouse[256];
 	
 	unsigned int memtotal;
-	struct MEMMAN *memman=(struct MEMMAN *)MEMMAN_ADDR;
+	//struct MEMMAN *memman=(struct MEMMAN *)MEMMAN_ADDR;
+	MEMMAN *memman=(MEMMAN*)MEMMAN_ADDR;
 	memtotal=memtest(0x00400000,0xbfffffff);
-	memman_init(memman);
-	memman_free(memman,0x00001000,0x0009e000);
-	memman_free(memman,0x00400000,memtotal-0x00400000);
+	//memman->init(memman);
+	memman->free(0x00001000,0x0009e000);
+	memman->free(0x00400000,memtotal-0x00400000);
 	char s[15];
 
 	init_palette();
 	shtctl=sheetctrl_init(memman,binfo->vram,binfo->scrnx,binfo->scrny);
 	sht_back=sheet_alloc(shtctl);
 	sht_mouse=sheet_alloc(shtctl);
-	buf_back=(unsigned char *)memman_alloc_4k(memman,binfo->scrnx*binfo->scrny);
+	buf_back=(unsigned char *)memman->alloc_4k(binfo->scrnx*binfo->scrny);
 	sheet_setbuf(sht_back,buf_back,binfo->scrnx,binfo->scrny,-1);
 	sheet_setbuf(sht_mouse,buf_mouse,16,16,99);
 	init_screen(buf_back,binfo->scrnx,binfo->scrny);
@@ -46,7 +48,7 @@ void HariMain(void)
 	sheet_updown(shtctl,sht_mouse,1);
 	sprintf(s,"(%3d,%3d)",mx,my);
 	putfonts8_asc(buf_back,binfo->scrnx,0,0,COL8_FFFFFF,s);
-	sprintf(s,"mem: %dMB free:%dKB",memtotal/0x400000*4,memman_total(memman)/1024);
+	sprintf(s,"mem: %dMB free:%dKB",memtotal/0x400000*4,memman->total()/1024);
 	putfonts8_asc(buf_back,binfo->scrnx,0,32,COL8_840084,s);
 	sheet_refresh(shtctl,sht_back,0,0,binfo->scrnx,48);
 

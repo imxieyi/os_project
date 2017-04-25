@@ -1,5 +1,5 @@
-#ifndef _FIFO_H
-#define _FIFO_H
+#ifndef _FIFO_HPP
+#define _FIFO_HPP
 
 #ifdef __cplusplus
 extern "C"{
@@ -11,7 +11,6 @@ private:
 	unsigned char *buf;
 	int r,w,size,free,flags;
 public:
-	FIFO(int size);
 	FIFO(int size,unsigned char *buf);
 	int put(unsigned char data);
 	int get();

@@ -1,81 +1,82 @@
-#include "headers.h"
+#include "include/headers.h"
+#include "include/memory.hpp"
 
-void memman_init(struct MEMMAN *man){
-	man->frees=0;	//可用信息数
-	man->maxfrees=0;//frees的最大值
-	man->lostsize=0;//释放失败内存大小和
-	man->losts=0;	//释放失败次数
+MEMMAN::MEMMAN(){
+	this->frees=0;	//可用信息数
+	this->maxfrees=0;//frees的最大值
+	this->lostsize=0;//释放失败内存大小和
+	this->losts=0;	//释放失败次数
 	return;
 }
 
-unsigned int memman_total(struct MEMMAN *man){
+unsigned int MEMMAN::total(){
 	unsigned int i,t=0;
-	for(i=0;i<man->frees;i++)
-		t+=man->free[i].size;
+	for(i=0;i<this->frees;i++)
+		t+=this->freeinfo[i].size;
 	return t;
 }
 
-unsigned int memman_alloc(struct MEMMAN *man,unsigned int size){
+unsigned int MEMMAN::alloc(unsigned int size){
 	unsigned int i,a;
-	for(i=0;i<man->frees;i++)
-		if(man->free[i].size>=size){
-			a=man->free[i].addr;
-			man->free[i].addr+=size;
-			man->free[i].size-=size;
-			if(man->free[i].size==0){
-				man->frees--;
-				for(;i<man->frees;i++)
-					man->free[i]=man->free[i+1];
+	for(i=0;i<this->frees;i++)
+		if(this->freeinfo[i].size>=size){
+			a=this->freeinfo[i].addr;
+			this->freeinfo[i].addr+=size;
+			this->freeinfo[i].size-=size;
+			if(this->freeinfo[i].size==0){
+				this->frees--;
+				for(;i<this->frees;i++)
+					this->freeinfo[i]=this->freeinfo[i+1];
 			}
 			return a;
 		}
 	return 0;
 }
 
-int memman_free(struct MEMMAN *man,unsigned int addr,unsigned int size){
+int MEMMAN::free(unsigned int addr,unsigned int size){
 	int i,j;
-	for(i=0;i<man->frees;i++)
-		if(man->free[i].addr>addr)
+	for(i=0;i<this->frees;i++)
+		if(this->freeinfo[i].addr>addr)
 			break;
 	if(i>0)
-		if(man->free[i-1].addr+man->free[i-1].size==addr){
-			man->free[i-1].size+=size;
-			if(i<man->frees)
-				if(addr+size==man->free[i].addr){
-					man->free[i-1].size+=man->free[i].size;
-					man->frees--;
-					for(;i<man->frees;i++)
-						man->free[i]=man->free[i+1];
+		if(this->freeinfo[i-1].addr+this->freeinfo[i-1].size==addr){
+			this->freeinfo[i-1].size+=size;
+			if(i<this->frees)
+				if(addr+size==this->freeinfo[i].addr){
+					this->freeinfo[i-1].size+=this->freeinfo[i].size;
+					this->frees--;
+					for(;i<this->frees;i++)
+						this->freeinfo[i]=this->freeinfo[i+1];
 				}
 			return 0;
 		}
-	if(i<man->frees)
-		if(addr+size==man->free[i].addr){
-			man->free[i].addr=addr;
-			man->free[i].size+=size;
+	if(i<this->frees)
+		if(addr+size==this->freeinfo[i].addr){
+			this->freeinfo[i].addr=addr;
+			this->freeinfo[i].size+=size;
 			return 0;
 		}
-	if(man->frees<MEMMAN_FREES){
-		for(j=man->frees;j>i;j--)
-			man->free[j]=man->free[j-1];
-		man->frees++;
-		if(man->maxfrees<man->frees)
-			man->maxfrees=man->frees;
-		man->free[i].addr=addr;
-		man->free[i].size=size;
+	if(this->frees<MEMMAN_FREES){
+		for(j=this->frees;j>i;j--)
+			this->freeinfo[j]=this->freeinfo[j-1];
+		this->frees++;
+		if(this->maxfrees<this->frees)
+			this->maxfrees=this->frees;
+		this->freeinfo[i].addr=addr;
+		this->freeinfo[i].size=size;
 		return 0;
 	}
-	man->losts++;
-	man->lostsize+=size;
+	this->losts++;
+	this->lostsize+=size;
 	return -1;
 }
 
-unsigned int memman_alloc_4k(struct MEMMAN *man,unsigned int size){
+unsigned int MEMMAN::alloc_4k(unsigned int size){
 	size=(size+0xfff)&0xfffff000;
-	return memman_alloc(man,size);
+	return this->alloc(size);
 }
 
-int memman_free_4k(struct MEMMAN *man,unsigned int addr,unsigned int size){
+int MEMMAN::free_4k(unsigned int addr,unsigned int size){
 	size=(size+0xfff)&0xfffff000;
-	return memman_free(man,addr,size);
+	return this->free(addr,size);
 }
