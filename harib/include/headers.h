@@ -137,17 +137,6 @@ void inthandler27(int *esp);
 #define PIC1_ICW3		0x00a1
 #define PIC1_ICW4		0x00a1
 
-//fifo.c
-#define FLAGS_OVERRUN	0x0001
-struct FIFO8 {
-	unsigned char *buf;
-	int r,w,size,free,flags;
-};
-void fifo8_init(struct FIFO8 *fifo,int size,unsigned char *buf);
-int fifo8_put(struct FIFO8 *fifo,unsigned char data);
-int fifo8_get(struct FIFO8 *fifo);
-int fifo8_status(struct FIFO8 *fifo);
-
 //keyboard.c
 void wait_kbc_sendready(void);
 void init_keyboard(void);

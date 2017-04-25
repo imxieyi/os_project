@@ -1,4 +1,5 @@
-#include "headers.h"
+#include "include/headers.h"
+#include "include/fifo.hpp"
 
 void enable_mouse(struct MOUSE_DEC *mdec){
 	//激活鼠标
@@ -34,13 +35,13 @@ int mouse_decode(struct MOUSE_DEC *mdec,unsigned char dat){
 	return 0;
 }
 
-struct FIFO8 mousebuf;
+FIFO *mousebuf;
 //来自PS/2鼠标的中断
 void inthandler2c(int *esp){
 	unsigned char data;
 	io_out8(PIC1_OCW2,0x64);
 	io_out8(PIC0_OCW2,0x62);
 	data=io_in8(PORT_KEYDAT);
-	fifo8_put(&mousebuf,data);
+	mousebuf->put(data);
 	return;
 }

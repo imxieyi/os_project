@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include "headers.h"
+#include "include/headers.h"
+#include "include/fifo.hpp"
 
-extern struct FIFO8 keybuf;
-extern struct FIFO8 mousebuf;
+extern FIFO *keybuf;
+extern FIFO *mousebuf;
 
 #ifdef __cplusplus
 extern "C"{
@@ -56,25 +57,25 @@ void HariMain(void)
 	io_out8(PIC1_IMR, 0xef);//允许鼠标发送中断(11101111)
 	
 	unsigned char keybuff[32];
-	fifo8_init(&keybuf,32,keybuff);
+	keybuf=&FIFO(32,keybuff);
 	unsigned char mousebuff[128];
-	fifo8_init(&mousebuf,128,mousebuff);
+	mousebuf=&FIFO(128,mousebuff);
 
 	unsigned char i;
 	for (;;) {
 		io_cli();
-		if(fifo8_status(&keybuf)+fifo8_status(&mousebuf)==0){
+		if(keybuf->status()+mousebuf->status()==0){
 			io_stihlt();
 		}else{
-			if(fifo8_status(&keybuf)!=0){
-				i=fifo8_get(&keybuf);
+			if(keybuf->status()!=0){
+				i=keybuf->get();
 				io_sti();
 				sprintf(s,"%02X",i);
 				boxfill8(buf_back,binfo->scrnx,COL8_008484,0,16,15,31);
 				putfonts8_asc(buf_back,binfo->scrnx,0,16,COL8_FFFFFF,s);
 				sheet_refresh(shtctl,sht_back,0,16,16,32);
-			} else if(fifo8_status(&mousebuf)!=0){
-				i=fifo8_get(&mousebuf);
+			} else if(mousebuf->status()!=0){
+				i=mousebuf->get();
 				io_sti();
 				if(mouse_decode(&mdec,i)){
 					sprintf(s,"[lcr %4d %4d]",mdec.x,mdec.y);
