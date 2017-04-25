@@ -1,10 +1,11 @@
-#include "headers.h"
+#include "include/headers.h"
+#include "include/memory.hpp"
 
 //图层控制
-struct SHEETCTRL *sheetctrl_init(struct MEMMAN *memman,unsigned char *vram,int xsize,int ysize){
+struct SHEETCTRL *sheetctrl_init(MEMMAN *memman,unsigned char *vram,int xsize,int ysize){
 	struct SHEETCTRL *ctl;
 	int i;
-	ctl=(struct SHEETCTRL *)memman_alloc_4k(memman,sizeof(struct SHEETCTRL));
+	ctl=(struct SHEETCTRL *)memman->alloc_4k(sizeof(struct SHEETCTRL));
 	if(ctl==0){
 		return ctl;
 	}
