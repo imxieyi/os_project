@@ -22,27 +22,6 @@ void init_pic(){
 	return;
 }
 
-struct FIFO8 keybuf;
-//来自PS/2键盘的中断
-void inthandler21(int *esp){
-	unsigned char data;
-	io_out8(PIC0_OCW2, 0x61);	//通知PIC IRQ-01已经受理完毕
-	data=io_in8(PORT_KEYDAT);
-	fifo8_put(&keybuf,data);
-	return;
-}
-
-struct FIFO8 mousebuf;
-//来自PS/2鼠标的中断
-void inthandler2c(int *esp){
-	unsigned char data;
-	io_out8(PIC1_OCW2,0x64);
-	io_out8(PIC0_OCW2,0x62);
-	data=io_in8(PORT_KEYDAT);
-	fifo8_put(&mousebuf,data);
-	return;
-}
-
 void inthandler27(int *esp)
 /* PIC0からの不完全割り込み対策 */
 /* Athlon64X2機などではチップセットの都合によりPICの初期化時にこの割り込みが1度だけおこる */

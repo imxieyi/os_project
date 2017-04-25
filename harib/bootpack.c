@@ -3,11 +3,33 @@
 
 extern struct FIFO8 keybuf;
 extern struct FIFO8 mousebuf;
+/*unsigned int memtest(unsigned int start,unsigned int end){
+	unsigned int cr0;
+	cr0=load_cr0();
+	cr0|=CR0_CACHE_DISABLE;
+	store_cr0(cr0);
 
-void wait_kbc_sendready(void);
-void init_keyboard(void);
-void enable_mouse(struct MOUSE_DEC *mdec);
-int mouse_decode(struct MOUSE_DEC *mdec,unsigned char dat);
+	unsigned int i,*p,old,pat0=0x66996699,pat1=0x99669966;
+	for(i=start;i<=end;i+=0x400000){//改进：vmware要求内存必须是4MB的倍数，所以直接以4MB为单位检查内存
+		p=(unsigned int *)(i+0x3ffffc);
+		old=*p;
+		*p=pat0;
+		*p^=0xffffffff;
+		if(*p!=pat1){
+			not_memory:
+			*p=old;
+			break;
+		}
+		*p^=0xffffffff;
+		if(*p!=pat0)goto not_memory;
+		*p=old;
+	}
+
+	cr0=load_cr0();
+	cr0&=~CR0_CACHE_DISABLE;
+	store_cr0(cr0);
+	return i;
+}*/
 
 void HariMain(void)
 {
@@ -19,12 +41,8 @@ void HariMain(void)
 	init_palette();
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
 	
-	putfonts8_asc(binfo->vram,binfo->scrnx,8,8,COL8_FFFFFF,"ABC 123");
-	putfonts8_asc(binfo->vram,binfo->scrnx,31,31,COL8_000000,"Project OS.");
-	putfonts8_asc(binfo->vram,binfo->scrnx,30,30,COL8_FFFFFF,"Project OS.");
-	
 	char s[15];
-	sprintf(s,"scrnx = %d",binfo->scrnx);
+	sprintf(s,"mem: %dMB",memtest(0x00400000,0xbfffffff)/0x400000*4);
 	putfonts8_asc(binfo->vram,binfo->scrnx,16,64,COL8_840084,s);
 	
 	char *mcursor;
@@ -84,53 +102,4 @@ void HariMain(void)
 			}
 		}
 	}
-}
-
-void wait_kbc_sendready(void){
-	//等待键盘控制电路准备完毕
-	for(;;)
-		if((io_in8(PORT_KEYSTA)&KEYSTA_SEND_NOTREADY)==0)
-			return;
-}
-
-void init_keyboard(void){
-	wait_kbc_sendready();
-	io_out8(PORT_KEYCMD,KEYCMD_WRITE_MODE);
-	wait_kbc_sendready();
-	io_out8(PORT_KEYDAT,KBC_MODE);
-	return;
-}
-
-void enable_mouse(struct MOUSE_DEC *mdec){
-	//激活鼠标
-	wait_kbc_sendready();
-	io_out8(PORT_KEYCMD,KEYCMD_SENDTO_MOUSE);
-	wait_kbc_sendready();
-	io_out8(PORT_KEYDAT,MOUSECMD_ENABLE);
-	//如果成功，键盘控制器返回ACK(0xfa)
-	mdec->phase=-1;//等待0xfa
-	return;
-}
-
-int mouse_decode(struct MOUSE_DEC *mdec,unsigned char dat){
-	if(mdec->phase==-1){
-		if(dat==0xfa)
-			mdec->phase=0;
-		return 0;
-	}
-	mdec->buf[mdec->phase]=dat;
-	if(!mdec->phase && (dat&0xc8)!=0x08)
-		return 0;
-	if(!(mdec->phase=(mdec->phase+1)%3)){
-		mdec->btn=mdec->buf[0]&0x07;
-		mdec->x=mdec->buf[1];
-		mdec->y=mdec->buf[2];
-		if(mdec->buf[0]&0x10)
-			mdec->x|=0xffffff00;
-		if(mdec->buf[0]&0x20)
-			mdec->y|=0xffffff00;
-		mdec->y=-mdec->y;
-		return 1;
-	}
-	return 0;
 }

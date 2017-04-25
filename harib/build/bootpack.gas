@@ -1,16 +1,12 @@
 	.file	"bootpack.c"
 	.data
 LC0:
-	.ascii "ABC 123\0"
-LC1:
-	.ascii "Project OS.\0"
+	.ascii "mem: %dMB\0"
 LC2:
-	.ascii "scrnx = %d\0"
-LC4:
 	.ascii "[lcr %4d %4d]\0"
-LC5:
-	.ascii "(%3d,%3d)\0"
 LC3:
+	.ascii "(%3d,%3d)\0"
+LC1:
 	.ascii "%02X\0"
 	.text
 	.balign 2
@@ -25,7 +21,6 @@ _HariMain:
 	pushl	%ebx
 	movl	$78, %esi
 	subl	$196, %esp
-	leal	-28(%ebp), %ebx
 	call	_init_gdtidt
 	call	_init_pic
 	call	_io_sti
@@ -36,35 +31,16 @@ _HariMain:
 	pushl	%eax
 	pushl	4088
 	call	_init_screen
+	pushl	$-1073741825
+	pushl	$4194304
+	call	_memtest
+	popl	%ecx
+	shrl	$22, %eax
+	popl	%ebx
+	sall	$2, %eax
+	leal	-28(%ebp), %ebx
+	pushl	%eax
 	pushl	$LC0
-	pushl	$7
-	pushl	$8
-	pushl	$8
-	movswl	4084,%eax
-	pushl	%eax
-	pushl	4088
-	call	_putfonts8_asc
-	addl	$36, %esp
-	pushl	$LC1
-	pushl	$0
-	pushl	$31
-	pushl	$31
-	movswl	4084,%eax
-	pushl	%eax
-	pushl	4088
-	call	_putfonts8_asc
-	pushl	$LC1
-	pushl	$7
-	pushl	$30
-	pushl	$30
-	movswl	4084,%eax
-	pushl	%eax
-	pushl	4088
-	call	_putfonts8_asc
-	addl	$48, %esp
-	movswl	4084,%eax
-	pushl	%eax
-	pushl	$LC2
 	pushl	%ebx
 	call	_sprintf
 	pushl	%ebx
@@ -75,7 +51,7 @@ _HariMain:
 	pushl	%eax
 	pushl	4088
 	call	_putfonts8_asc
-	addl	$36, %esp
+	addl	$48, %esp
 	pushl	$14
 	pushl	-208(%ebp)
 	call	_init_mouse_cursor8
@@ -148,7 +124,7 @@ L2:
 	je	L2
 	pushl	-36(%ebp)
 	pushl	-40(%ebp)
-	pushl	$LC4
+	pushl	$LC2
 	leal	-28(%ebp), %ebx
 	pushl	%ebx
 	call	_sprintf
@@ -217,7 +193,7 @@ L16:
 L17:
 	pushl	%esi
 	pushl	%edi
-	pushl	$LC5
+	pushl	$LC3
 	pushl	%ebx
 	call	_sprintf
 	pushl	$15
@@ -264,7 +240,7 @@ L19:
 	movzbl	%bl, %eax
 	pushl	%eax
 	leal	-28(%ebp), %ebx
-	pushl	$LC3
+	pushl	$LC1
 	pushl	%ebx
 	call	_sprintf
 	pushl	$31
@@ -290,125 +266,6 @@ L19:
 L18:
 	call	_io_stihlt
 	jmp	L2
-	.balign 2
-.globl _wait_kbc_sendready
-	.def	_wait_kbc_sendready;	.scl	2;	.type	32;	.endef
-_wait_kbc_sendready:
-	pushl	%ebp
-	movl	%esp, %ebp
-L23:
-	pushl	$100
-	call	_io_in8
-	popl	%ecx
-	andl	$2, %eax
-	jne	L23
-	leave
-	ret
-	.balign 2
-.globl _init_keyboard
-	.def	_init_keyboard;	.scl	2;	.type	32;	.endef
-_init_keyboard:
-	pushl	%ebp
-	movl	%esp, %ebp
-	call	_wait_kbc_sendready
-	pushl	$96
-	pushl	$100
-	call	_io_out8
-	call	_wait_kbc_sendready
-	pushl	$71
-	pushl	$96
-	call	_io_out8
-	leave
-	ret
-	.balign 2
-.globl _enable_mouse
-	.def	_enable_mouse;	.scl	2;	.type	32;	.endef
-_enable_mouse:
-	pushl	%ebp
-	movl	%esp, %ebp
-	call	_wait_kbc_sendready
-	pushl	$212
-	pushl	$100
-	call	_io_out8
-	call	_wait_kbc_sendready
-	pushl	$244
-	pushl	$96
-	call	_io_out8
-	movl	8(%ebp), %eax
-	movb	$-1, 3(%eax)
-	leave
-	ret
-	.balign 2
-.globl _mouse_decode
-	.def	_mouse_decode;	.scl	2;	.type	32;	.endef
-_mouse_decode:
-	pushl	%ebp
-	movl	%esp, %ebp
-	pushl	%edi
-	pushl	%esi
-	movl	8(%ebp), %ecx
-	pushl	%ebx
-	movl	12(%ebp), %esi
-	movb	3(%ecx), %dl
-	movl	%esi, %ebx
-	cmpb	$-1, %dl
-	je	L36
-	movsbl	%dl,%edi
-	testb	%dl, %dl
-	movb	%bl, (%ecx,%edi)
-	jne	L32
-	andl	$-56, %ebx
-	xorl	%eax, %eax
-	cmpb	$8, %bl
-	je	L32
-L29:
-	popl	%ebx
-	popl	%esi
-	popl	%edi
-	popl	%ebp
-	ret
-L32:
-	movsbl	%dl,%eax
-	incl	%eax
-	movl	$3, %edx
-	movl	%edx, %ebx
-	cltd
-	idivl	%ebx
-	movb	%dl, 3(%ecx)
-	testb	%dl, %dl
-	jne	L33
-	movb	(%ecx), %bl
-	movl	%ebx, %eax
-	andl	$7, %eax
-	movl	%eax, 12(%ecx)
-	movzbl	2(%ecx), %eax
-	movl	%eax, 8(%ecx)
-	movb	%bl, %al
-	movzbl	1(%ecx), %edx
-	andl	$16, %eax
-	movl	%edx, 4(%ecx)
-	testb	%al, %al
-	je	L34
-	orl	$-256, %edx
-	movl	%edx, 4(%ecx)
-L34:
-	andl	$32, %ebx
-	testb	%bl, %bl
-	je	L35
-	orl	$-256, 8(%ecx)
-L35:
-	negl	8(%ecx)
-	movl	$1, %eax
-	jmp	L29
-L33:
-	xorl	%eax, %eax
-	jmp	L29
-L36:
-	cmpb	$-6, %bl
-	jne	L33
-	movb	$0, 3(%ecx)
-	jmp	L33
-	.def	_io_in8;	.scl	2;	.type	32;	.endef
 	.def	_mouse_decode;	.scl	2;	.type	32;	.endef
 	.def	_boxfill8;	.scl	2;	.type	32;	.endef
 	.def	_fifo8_get;	.scl	2;	.type	32;	.endef
@@ -421,8 +278,9 @@ L36:
 	.def	_init_keyboard;	.scl	2;	.type	32;	.endef
 	.def	_putblock8_8;	.scl	2;	.type	32;	.endef
 	.def	_init_mouse_cursor8;	.scl	2;	.type	32;	.endef
-	.def	_sprintf;	.scl	2;	.type	32;	.endef
 	.def	_putfonts8_asc;	.scl	2;	.type	32;	.endef
+	.def	_memtest;	.scl	2;	.type	32;	.endef
+	.def	_sprintf;	.scl	2;	.type	32;	.endef
 	.def	_init_screen;	.scl	2;	.type	32;	.endef
 	.def	_init_palette;	.scl	2;	.type	32;	.endef
 	.def	_io_sti;	.scl	2;	.type	32;	.endef
