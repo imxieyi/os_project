@@ -1,1 +1,0 @@
-To use the asm.bat, set the enviroment varialbe `TOLSET` to your `tolset` directory.
