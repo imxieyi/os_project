@@ -1,5 +1,4 @@
 TOOLPATH = ../tolset/z_tools/
-TOOLPATH = ../tolset/z_tools/
 INCPATH  = ../tolset/z_tools/haribote/
 
 OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj build/gdtidt.obj build/interrupt.obj build/fifo.obj
@@ -15,8 +14,10 @@ BIM2HRB  = $(TOOLPATH)bim2hrb.exe
 RULEFILE = $(TOOLPATH)haribote/haribote.rul
 EDIMG    = $(TOOLPATH)edimg.exe
 IMGTOL   = $(TOOLPATH)imgtol.com
-COPY     = cp
-DEL      = rm
+#COPY     = cmd /c copy /y
+#DEL      = cmd /c del /f
+COPY	 = cp
+DEL		 = rm
 
 # デフォルト動作
 
@@ -58,7 +59,7 @@ bootpack.hrb : bootpack.bim Makefile
 	$(BIM2HRB) build/bootpack.bim build/bootpack.hrb 0
 
 haribote.sys : asmhead.bin bootpack.hrb Makefile
-	# copy /B asmhead.bin+bootpack.hrb haribote.sys
+#	cmd /c copy /B build\asmhead.bin+build\bootpack.hrb build\haribote.sys
 	cat build/asmhead.bin build/bootpack.hrb > build/haribote.sys
 
 haribote.img : ipl.bin haribote.sys Makefile
@@ -75,6 +76,7 @@ img :
 run :
 	$(MAKE) img
 	$(COPY) build/haribote.img $(TOOLPATH)qemu/fdimage0.bin
+#	$(COPY) build\haribote.img ..\tolset\z_tools\qemu\fdimage0.bin
 	$(MAKE) -C $(TOOLPATH)qemu
 
 install :

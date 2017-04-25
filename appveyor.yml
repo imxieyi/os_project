@@ -1,0 +1,20 @@
+  version: 1.0.{build}
+
+  environment:
+    matrix:
+    - COMPILER: msys2
+      PLATFORM: x86
+      MSYS2_ARCH: x86
+      MSYS2_DIR: msys32
+      MSYSTEM: MINGW32
+      BIT: 32
+
+  install:
+    # running under CI
+    - set PATH=C:\msys32\usr\bin;%PATH%
+
+  build_script:
+    - cd '%APPVEYOR_BUILD_FOLDER%\harib'
+    - make img
+
+  test_script:
