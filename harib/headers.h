@@ -31,6 +31,12 @@ struct GATE_DESCRIPTOR {
 	short offset_high;
 };
 
+struct MOUSE_DEC {
+	unsigned char buf[3];
+	char phase;
+	int x,y,btn;
+};
+
 //colors
 #define COL8_000000		0
 #define COL8_FF0000		1
