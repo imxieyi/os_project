@@ -14,7 +14,7 @@
     - set PATH=C:\msys32\usr\bin;%PATH%
 
   build_script:
-    - cd '%APPVEYOR_BUILD_FOLDER%\harib'
+    - cd harib
     - make img
 
   test_script:
