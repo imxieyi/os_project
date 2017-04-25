@@ -1,7 +1,7 @@
 	.file	"bootpack.c"
 	.data
 LC0:
-	.ascii "mem: %dMB\0"
+	.ascii "mem: %dMB free:%dKB\0"
 LC2:
 	.ascii "[lcr %4d %4d]\0"
 LC3:
@@ -34,12 +34,27 @@ _HariMain:
 	pushl	$-1073741825
 	pushl	$4194304
 	call	_memtest
-	popl	%ecx
-	shrl	$22, %eax
-	popl	%ebx
-	sall	$2, %eax
-	leal	-28(%ebp), %ebx
+	pushl	$3932160
+	movl	%eax, %ebx
+	call	_memman_init
+	pushl	$647168
+	pushl	$4096
+	pushl	$3932160
+	call	_memman_free
+	leal	-4194304(%ebx), %eax
+	shrl	$22, %ebx
+	addl	$36, %esp
 	pushl	%eax
+	pushl	$4194304
+	pushl	$3932160
+	call	_memman_free
+	pushl	$3932160
+	call	_memman_total
+	shrl	$10, %eax
+	movl	%eax, (%esp)
+	leal	0(,%ebx,4), %eax
+	pushl	%eax
+	leal	-28(%ebp), %ebx
 	pushl	$LC0
 	pushl	%ebx
 	call	_sprintf
@@ -51,7 +66,7 @@ _HariMain:
 	pushl	%eax
 	pushl	4088
 	call	_putfonts8_asc
-	addl	$48, %esp
+	addl	$52, %esp
 	pushl	$14
 	pushl	-208(%ebp)
 	call	_init_mouse_cursor8
@@ -279,8 +294,11 @@ L18:
 	.def	_putblock8_8;	.scl	2;	.type	32;	.endef
 	.def	_init_mouse_cursor8;	.scl	2;	.type	32;	.endef
 	.def	_putfonts8_asc;	.scl	2;	.type	32;	.endef
-	.def	_memtest;	.scl	2;	.type	32;	.endef
+	.def	_memman_total;	.scl	2;	.type	32;	.endef
 	.def	_sprintf;	.scl	2;	.type	32;	.endef
+	.def	_memman_free;	.scl	2;	.type	32;	.endef
+	.def	_memman_init;	.scl	2;	.type	32;	.endef
+	.def	_memtest;	.scl	2;	.type	32;	.endef
 	.def	_init_screen;	.scl	2;	.type	32;	.endef
 	.def	_init_palette;	.scl	2;	.type	32;	.endef
 	.def	_io_sti;	.scl	2;	.type	32;	.endef

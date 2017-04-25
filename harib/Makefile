@@ -1,7 +1,9 @@
 TOOLPATH = ../tolset/z_tools/
 INCPATH  = ../tolset/z_tools/haribote/
 
-OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj build/gdtidt.obj build/interrupt.obj build/fifo.obj build/keyboard.obj build/mouse.obj
+OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj \
+	 build/gdtidt.obj build/interrupt.obj build/fifo.obj build/keyboard.obj build/mouse.obj \
+	 build/memory.obj
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
@@ -50,7 +52,8 @@ hankaku.bin : hankaku.txt Makefile
 hankaku.obj : hankaku.bin Makefile
 	$(BIN2OBJ) build/hankaku.bin build/hankaku.obj _hankaku
 
-bootpack.bim : bootpack.obj naskfunc.obj hankaku.obj graphics.obj gdtidt.obj interrupt.obj fifo.obj keyboard.obj mouse.obj Makefile
+bootpack.bim : bootpack.obj naskfunc.obj hankaku.obj graphics.obj gdtidt.obj \
+			   interrupt.obj fifo.obj keyboard.obj mouse.obj memory.obj Makefile
 	$(OBJ2BIM) @$(RULEFILE) out:build/bootpack.bim stack:3136k map:build/bootpack.map \
 		$(OBJS_BOOTPACK)
 # 3MB+64KB=3136KB

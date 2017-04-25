@@ -3,33 +3,6 @@
 
 extern struct FIFO8 keybuf;
 extern struct FIFO8 mousebuf;
-/*unsigned int memtest(unsigned int start,unsigned int end){
-	unsigned int cr0;
-	cr0=load_cr0();
-	cr0|=CR0_CACHE_DISABLE;
-	store_cr0(cr0);
-
-	unsigned int i,*p,old,pat0=0x66996699,pat1=0x99669966;
-	for(i=start;i<=end;i+=0x400000){//改进：vmware要求内存必须是4MB的倍数，所以直接以4MB为单位检查内存
-		p=(unsigned int *)(i+0x3ffffc);
-		old=*p;
-		*p=pat0;
-		*p^=0xffffffff;
-		if(*p!=pat1){
-			not_memory:
-			*p=old;
-			break;
-		}
-		*p^=0xffffffff;
-		if(*p!=pat0)goto not_memory;
-		*p=old;
-	}
-
-	cr0=load_cr0();
-	cr0&=~CR0_CACHE_DISABLE;
-	store_cr0(cr0);
-	return i;
-}*/
 
 void HariMain(void)
 {
@@ -41,8 +14,14 @@ void HariMain(void)
 	init_palette();
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
 	
+	unsigned int memtotal;
+	struct MEMMAN *memman=(struct MEMMAN *)MEMMAN_ADDR;
+	memtotal=memtest(0x00400000,0xbfffffff);
+	memman_init(memman);
+	memman_free(memman,0x00001000,0x0009e000);
+	memman_free(memman,0x00400000,memtotal-0x00400000);
 	char s[15];
-	sprintf(s,"mem: %dMB",memtest(0x00400000,0xbfffffff)/0x400000*4);
+	sprintf(s,"mem: %dMB free:%dKB",memtotal/0x400000*4,memman_total(memman)/1024);
 	putfonts8_asc(binfo->vram,binfo->scrnx,16,64,COL8_840084,s);
 	
 	char *mcursor;
