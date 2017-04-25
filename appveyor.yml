@@ -3,17 +3,18 @@
   environment:
     matrix:
     - COMPILER: msys2
-      PLATFORM: x64
-      MSYS2_ARCH: x86_64
-      MSYS2_DIR: msys64
-      MSYSTEM: MINGW64
-      BIT: 64
+      PLATFORM: x86
+      MSYS2_ARCH: x86
+      MSYS2_DIR: msys32
+      MSYSTEM: MINGW32
+      BIT: 32
 
   install:
     # running under CI
 
   build_script:
-    - set PATH=C:\msys64\usr\bin;%PATH%
+    - dir C:\
+    - set PATH=C:\msys32\usr\bin;%PATH%
     - cd harib
     - make img
 

@@ -7,7 +7,7 @@ OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/gr
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
-CXX      = g++ -I$(INCPATH) -I. -Wall -Wextra -nostdlib -nostdinc -nostartfiles -nodefaultlibs -fno-builtin -c -fno-rtti -fpermissive -fno-exceptions -fpic
+CXX      = c:\MinGW\bin\g++.exe -I$(INCPATH) -I./include -Wall -Wextra -nostdlib -nostdinc -nostartfiles -nodefaultlibs -fno-builtin -c -fno-rtti -fpermissive -fno-exceptions -fpic
 OBJ2BIM  = $(TOOLPATH)obj2bim.exe
 MAKEFONT = $(TOOLPATH)makefont.exe
 BIN2OBJ  = $(TOOLPATH)bin2obj.exe
