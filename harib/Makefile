@@ -2,7 +2,7 @@ TOOLPATH = ../tolset/z_tools/
 TOOLPATH = ../tolset/z_tools/
 INCPATH  = ../tolset/z_tools/haribote/
 
-OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj build/gdtidt.obj build/interrupt.obj
+OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj build/gdtidt.obj build/interrupt.obj build/fifo.obj
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
@@ -21,7 +21,7 @@ DEL      = rm
 # デフォルト動作
 
 default :
-	$(MAKE) img
+	$(MAKE) run
 
 # ファイル生成規則
 
@@ -49,7 +49,7 @@ hankaku.bin : hankaku.txt Makefile
 hankaku.obj : hankaku.bin Makefile
 	$(BIN2OBJ) build/hankaku.bin build/hankaku.obj _hankaku
 
-bootpack.bim : bootpack.obj naskfunc.obj hankaku.obj graphics.obj gdtidt.obj interrupt.obj Makefile
+bootpack.bim : bootpack.obj naskfunc.obj hankaku.obj graphics.obj gdtidt.obj interrupt.obj fifo.obj Makefile
 	$(OBJ2BIM) @$(RULEFILE) out:build/bootpack.bim stack:3136k map:build/bootpack.map \
 		$(OBJS_BOOTPACK)
 # 3MB+64KB=3136KB
@@ -74,7 +74,7 @@ img :
 
 run :
 	$(MAKE) img
-	$(COPY) haribote.img $(TOOLPATH)qemu/fdimage0.bin
+	$(COPY) build/haribote.img $(TOOLPATH)qemu/fdimage0.bin
 	$(MAKE) -C $(TOOLPATH)qemu
 
 install :
