@@ -1,4 +1,5 @@
-#include<headers.h>
+#include <stdio.h>
+#include "headers.h"
 
 //初始化PIC(Programmable Interrupt Controller)
 void init_pic(){
@@ -19,26 +20,6 @@ void init_pic(){
 	io_out8(PIC1_IMR,	0xff	);//11111111 禁止所有中断
 
 	return;
-}
-
-//来自PS/2键盘的中断
-void inthandler21(int *esp){
-	struct BOOTINFO *binfo=(struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram,binfo->scrnx,COL8_000000,0,0,32*8-1,15);
-	putfonts8_asc(binfo->vram,binfo->scrnx,0,0,COL8_FFFFFF,"INT 21 (IRQ-1) : PS/2 keyboard");
-	for(;;){
-		io_hlt();
-	}
-}
-
-//来自PS/2鼠标的中断
-void inthandler2c(int *esp){
-	struct BOOTINFO *binfo=(struct BOOTINFO *) ADR_BOOTINFO;
-	boxfill8(binfo->vram,binfo->scrnx,COL8_000000,0,0,32*8-1,15);
-	putfonts8_asc(binfo->vram,binfo->scrnx,0,0,COL8_FFFFFF,"INT 21 (IRQ-1) : PS/2 mouse");
-	for(;;){
-		io_hlt();
-	}
 }
 
 void inthandler27(int *esp)

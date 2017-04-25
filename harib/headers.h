@@ -3,6 +3,38 @@
 
 #define ADR_BOOTINFO	0x00000ff0
 
+//键盘鼠标部分
+#define PORT_KEYDAT		0x0060
+#define PORT_KEYSTA		0x0064
+#define PORT_KEYCMD		0x0064
+#define KEYSTA_SEND_NOTREADY	0x02
+#define KEYCMD_WRITE_MODE		0x60
+#define KBC_MODE				0x47
+#define KEYCMD_SENDTO_MOUSE		0xd4
+#define MOUSECMD_ENABLE			0xf4
+
+//内存管理部分
+#define EFLAGS_AC_BIT		0x00040000
+#define CR0_CACHE_DISABLE	0x60000000
+#define MEMMAN_FREES		4000
+#define MEMMAN_ADDR			0x003c0000
+struct FREEINFO{
+	unsigned int addr,size;
+};
+struct MEMMAN{
+	int frees,maxfrees,lostsize,losts;
+	struct FREEINFO free[MEMMAN_FREES];
+};
+int load_cr0(void);
+void store_cr0(int cr0);
+unsigned int memtest(unsigned int start,unsigned int end);
+void memman_init(struct MEMMAN *man);
+unsigned int memman_total(struct MEMMAN *man);
+unsigned int memman_alloc(struct MEMMAN *man,unsigned int size);
+int memman_free(struct MEMMAN *man,unsigned int addr,unsigned int size);
+unsigned int memman_alloc_4k(struct MEMMAN *man,unsigned int size);
+int memman_free_4k(struct MEMMAN *man,unsigned int addr,unsigned int size);
+
 //structures
 struct BOOTINFO{
 	char cyls,leds,vmode,reserve;
@@ -20,6 +52,12 @@ struct GATE_DESCRIPTOR {
 	short offset_low, selector;
 	char dw_count, access_right;
 	short offset_high;
+};
+
+struct MOUSE_DEC {
+	unsigned char buf[3];
+	char phase;
+	int x,y,btn;
 };
 
 //colors
@@ -42,14 +80,15 @@ struct GATE_DESCRIPTOR {
 
 //naskfunc.nas
 void io_hlt(void);
+void io_sti(void);
 void io_cli(void);
+void io_stihlt(void);
+int io_in8(int port);
 void io_out8(int port, int data);
 int io_load_eflags(void);
 void io_store_eflags(int eflags);
 void load_gdtr(int limit, int addr);
 void load_idtr(int limit, int addr);
-void asm_inthandler21();
-void asm_inthandler2c();
 void asm_inthandler27();
 
 //graphics.c
@@ -76,7 +115,7 @@ void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
 #define AR_CODE32_ER	0x409a
 #define AR_INTGATE32	0x008e
 
-//int.c
+//interrupt.c
 void init_pic(void);
 void inthandler21(int *esp);
 void inthandler2c(int *esp);
@@ -93,5 +132,26 @@ void inthandler27(int *esp);
 #define PIC1_ICW2		0x00a1
 #define PIC1_ICW3		0x00a1
 #define PIC1_ICW4		0x00a1
+
+//fifo.c
+#define FLAGS_OVERRUN	0x0001
+struct FIFO8 {
+	unsigned char *buf;
+	int r,w,size,free,flags;
+};
+void fifo8_init(struct FIFO8 *fifo,int size,unsigned char *buf);
+int fifo8_put(struct FIFO8 *fifo,unsigned char data);
+int fifo8_get(struct FIFO8 *fifo);
+int fifo8_status(struct FIFO8 *fifo);
+
+//keyboard.c
+void wait_kbc_sendready(void);
+void init_keyboard(void);
+void asm_inthandler21();
+
+//mouse.c
+void enable_mouse(struct MOUSE_DEC *mdec);
+int mouse_decode(struct MOUSE_DEC *mdec,unsigned char dat);
+void asm_inthandler2c();
 
 #endif

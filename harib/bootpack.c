@@ -1,5 +1,8 @@
-#include<stdio.h>
-#include<headers.h>
+#include <stdio.h>
+#include "headers.h"
+
+extern struct FIFO8 keybuf;
+extern struct FIFO8 mousebuf;
 
 void HariMain(void)
 {
@@ -7,16 +10,18 @@ void HariMain(void)
 
 	init_gdtidt();
 	init_pic();
-	io_sti();//堯?CPU?惗拞抐丆場?IDT/PIC涍?弶巒壔
+	io_sti();//取消CPU中断禁止，因为IDT/PIC已初始化完成
 	init_palette();
 	init_screen(binfo->vram,binfo->scrnx,binfo->scrny);
 	
-	putfonts8_asc(binfo->vram,binfo->scrnx,8,8,COL8_FFFFFF,"ABC 123 敻敻");
-	putfonts8_asc(binfo->vram,binfo->scrnx,31,31,COL8_000000,"Project OS.");
-	putfonts8_asc(binfo->vram,binfo->scrnx,30,30,COL8_FFFFFF,"Project OS.");
-	
+	unsigned int memtotal;
+	struct MEMMAN *memman=(struct MEMMAN *)MEMMAN_ADDR;
+	memtotal=memtest(0x00400000,0xbfffffff);
+	memman_init(memman);
+	memman_free(memman,0x00001000,0x0009e000);
+	memman_free(memman,0x00400000,memtotal-0x00400000);
 	char s[15];
-	sprintf(s,"scrnx = %d",binfo->scrnx);
+	sprintf(s,"mem: %dMB free:%dKB",memtotal/0x400000*4,memman_total(memman)/1024);
 	putfonts8_asc(binfo->vram,binfo->scrnx,16,64,COL8_840084,s);
 	
 	char *mcursor;
@@ -24,10 +29,56 @@ void HariMain(void)
 	init_mouse_cursor8(mcursor,COL8_008484);
 	putblock8_8(binfo->vram,binfo->scrnx,16,16,mx,my,mcursor,16);
 
-	io_out8(PIC0_IMR, 0xf9);//堯?PIC1榓???惗拞抐
-	io_out8(PIC1_IMR, 0xef);//堯?憀??惗拞抐
+	init_keyboard();
+	struct MOUSE_DEC mdec;
+	enable_mouse(&mdec);
+	io_out8(PIC0_IMR, 0xf9);//允许PIC1和键盘发送中断(11111001)
+	io_out8(PIC1_IMR, 0xef);//允许鼠标发送中断(11101111)
 	
+	unsigned char keybuff[32];
+	fifo8_init(&keybuf,32,keybuff);
+	unsigned char mousebuff[128];
+	fifo8_init(&mousebuf,128,mousebuff);
+
+	unsigned char i;
 	for (;;) {
-		io_hlt();
+		io_cli();
+		if(fifo8_status(&keybuf)+fifo8_status(&mousebuf)==0){
+			io_stihlt();
+		}else{
+			if(fifo8_status(&keybuf)!=0){
+				i=fifo8_get(&keybuf);
+				io_sti();
+				sprintf(s,"%02X",i);
+				boxfill8(binfo->vram,binfo->scrnx,COL8_008484,0,16,15,31);
+				putfonts8_asc(binfo->vram,binfo->scrnx,0,16,COL8_FFFFFF,s);
+			} else if(fifo8_status(&mousebuf)!=0){
+				i=fifo8_get(&mousebuf);
+				io_sti();
+				if(mouse_decode(&mdec,i)){
+					sprintf(s,"[lcr %4d %4d]",mdec.x,mdec.y);
+					if(mdec.btn&0x01)
+						s[1]='L';
+					if(mdec.btn&0x02)
+						s[3]='R';
+					if(mdec.btn&0x04)
+						s[2]='C';
+					boxfill8(binfo->vram,binfo->scrnx,COL8_008484,32,16,32+15*8-1,31);
+					putfonts8_asc(binfo->vram,binfo->scrnx,32,16,COL8_FFFFFF,s);
+					//移动鼠标指针
+					boxfill8(binfo->vram,binfo->scrnx,COL8_008484,mx,my,mx+15,my+15);
+					mx+=mdec.x;
+					my+=mdec.y;
+					mx=mx<0?0:mx;
+					my=my<0?0:my;
+					mx=mx>binfo->scrnx-16?binfo->scrnx-16:mx;
+					my=my>binfo->scrny-16?binfo->scrny-16:my;
+					sprintf(s,"(%3d,%3d)",mx,my);
+					boxfill8(binfo->vram,binfo->scrnx,COL8_008484,0,0,79,15);
+					putfonts8_asc(binfo->vram,binfo->scrnx,0,0,COL8_FFFFFF,s);
+					putblock8_8(binfo->vram,binfo->scrnx,16,16,mx,my,mcursor,16);
+				}
+			}
+		}
 	}
 }
