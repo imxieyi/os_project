@@ -6,5 +6,8 @@ Author: Edward FANG, Y.M. PENG, Yi XIE.
 
 4-24 开始填坑gg
 
-ISO File attached to the original book (Japanese):
+Reference:
+- ISO File attached to the original book (Japanese):
 [http://pan.baidu.com/s/1c14ub2C](http://pan.baidu.com/s/1c14ub2C)
+- Source Code Chinese Edition
+[https://github.com/yourtion/30dayMakeOS](https://github.com/yourtion/30dayMakeOS)
