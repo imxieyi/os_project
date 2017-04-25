@@ -7,13 +7,15 @@ OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/gr
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
-CXX      = g++ -I$(INCPATH) -I. -Wall -Wextra -nostdlib -nostdinc -nostartfiles -nodefaultlibs -fno-builtin -c -fno-rtti -fpermissive -fno-exceptions -fpic
+CC1      = $(TOOLPATH)cc1.exe -I$(INCPATH) -I. -Os -Wall -quiet
+GAS2NASK = $(TOOLPATH)gas2nask.exe -a
 OBJ2BIM  = $(TOOLPATH)obj2bim.exe
 MAKEFONT = $(TOOLPATH)makefont.exe
 BIN2OBJ  = $(TOOLPATH)bin2obj.exe
 BIM2HRB  = $(TOOLPATH)bim2hrb.exe
 RULEFILE = $(TOOLPATH)haribote/haribote.rul
 EDIMG    = $(TOOLPATH)edimg.exe
+IMGTOL   = $(TOOLPATH)imgtol.com
 #COPY     = cmd /c copy /y
 #DEL      = cmd /c del /f
 COPY	 = cp
@@ -34,9 +36,15 @@ asmhead.bin : asmhead.nas Makefile
 	
 naskfunc.obj : naskfunc.nas Makefile
 	$(NASK) naskfunc.nas build/naskfunc.obj build/naskfunc.lst
-
-%.obj : %.cpp Makefile
-	$(CXX) -o build/$*.obj $*.cpp
+	
+%.gas : %.c Makefile
+	$(CC1) -o build/$*.gas $*.c
+	
+%.nas : %.gas Makefile
+	$(GAS2NASK) build/$*.gas build/$*.nas
+	
+%.obj : %.nas Makefile
+	$(NASK) build/$*.nas build/$*.obj build/$*.lst
 
 hankaku.bin : hankaku.txt Makefile
 	$(MAKEFONT) hankaku.txt build/hankaku.bin
@@ -73,6 +81,10 @@ run :
 	$(COPY) build/haribote.img $(TOOLPATH)qemu/fdimage0.bin
 #	$(COPY) build\haribote.img ..\tolset\z_tools\qemu\fdimage0.bin
 	$(MAKE) -C $(TOOLPATH)qemu
+
+install :
+	$(MAKE) img
+	$(IMGTOL) w a: haribote.img
 
 clean :
 	-$(DEL) build/*.*

@@ -4,6 +4,9 @@
 extern struct FIFO8 keybuf;
 extern struct FIFO8 mousebuf;
 
+#ifdef __cplusplus
+extern "C"{
+#endif
 void HariMain(void)
 {
 	struct BOOTINFO *binfo=(struct BOOTINFO *)0x0ff0;
@@ -101,3 +104,6 @@ void HariMain(void)
 		}
 	}
 }
+#ifdef __cplusplus
+}
+#endif

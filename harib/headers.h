@@ -1,6 +1,10 @@
 #ifndef _BOOTPACK_H
 #define _BOOTPACK_H
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 #define ADR_BOOTINFO	0x00000ff0
 
 //键盘鼠标部分
@@ -176,4 +180,7 @@ void sheet_refreshsub(struct SHEETCTRL *ctl, int vx0, int vy0, int vx1, int vy1)
 void sheet_slide(struct SHEETCTRL *ctl,struct SHEET *sht,int vx0,int vy0);
 void sheet_free(struct SHEETCTRL *ctl,struct SHEET *sht);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
