@@ -11,9 +11,9 @@
 
   install:
     # running under CI
-    - set PATH=C:\msys32\usr\bin;%PATH%
 
   build_script:
+    - set PATH=C:\msys32\usr\bin;%PATH%
     - cd harib
     - make img
 
