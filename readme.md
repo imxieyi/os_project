@@ -1,5 +1,7 @@
 ## 操作系统 (CS302) Project
 
+[![Build status](https://ci.appveyor.com/api/projects/status/m6qwods9m5g9ct25?svg=true)](https://ci.appveyor.com/project/imxieyi/os-project)
+
 Author: Edward FANG, Y.M. PENG, Yi XIE.
 
 先挖个坑hhhh 

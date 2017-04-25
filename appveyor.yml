@@ -14,7 +14,6 @@
 
   build_script:
     - set PATH=C:\msys64\usr\bin;%PATH%
-    - dir C:\msys64\usr\bin
     - cd harib
     - make img
 
