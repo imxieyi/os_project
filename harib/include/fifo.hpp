@@ -11,7 +11,7 @@ private:
 	unsigned char *buf;
 	int r,w,size,free,flags;
 public:
-	FIFO(int size,unsigned char *buf);
+	FIFO(class MEMMAN *memman,int size);
 	int put(unsigned char data);
 	int get();
 	int status();

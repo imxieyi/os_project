@@ -1,12 +1,13 @@
-#include "fifo.hpp"
+#include "include/fifo.hpp"
+#include "include/memory.hpp"
 
-FIFO::FIFO(int size,unsigned char *buf){
+FIFO::FIFO(MEMMAN *memman,int size){
 	this->size=size;
-	this->buf=buf;
-	this->free=size;
-	this->flags=0;
-	this->w=0;
-	this->r=0;
+	buf=(unsigned char *)memman->alloc(size);
+	free=size;
+	flags=0;
+	w=0;
+	r=0;
 	return;
 }
 

@@ -52,7 +52,7 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 	return;
 }
 
-void init_screen(char* vram,short xsize,short ysize){
+void init_screen(unsigned char* vram,short xsize,short ysize){
 	
 	boxfill8(vram, xsize, COL8_008484,  0,         0,          xsize -  1, ysize - 29);
 	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
@@ -72,9 +72,9 @@ void init_screen(char* vram,short xsize,short ysize){
 	boxfill8(vram, xsize, COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
 }
 
-void putfont8(char *vram, int xsize, int x, int y, char color, char *font){
+void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font){
 	int i;
-	char *p, d;
+	unsigned char *p, d;
 	for(i=0;i<16;i++){
 		p=vram+(y+i)*xsize+x;
 		d=font[i];
@@ -89,7 +89,7 @@ void putfont8(char *vram, int xsize, int x, int y, char color, char *font){
 	}
 }
 
-void putfonts8_asc(char *vram,int xsize,int x,int y,char c,unsigned char *s){
+void putfonts8_asc(unsigned char *vram,int xsize,int x,int y,char c,char *s){
 	extern char hankaku[4096];
 	for(;*s!=0x00;s++){
 		putfont8(vram,xsize,x,y,c,hankaku+*s*16);
@@ -97,10 +97,10 @@ void putfonts8_asc(char *vram,int xsize,int x,int y,char c,unsigned char *s){
 	}
 }
 
-void init_mouse_cursor8(char *mouse, char bc)
+void init_mouse_cursor8(unsigned char *mouse, char bc)
 /* 准备鼠标指针（16x16） */
 {
-	static char cursor[16][16] = {
+	static unsigned char cursor[16][16] = {
 		"**************..",
 		"*OOOOOOOOOOO*...",
 		"*OOOOOOOOOO*....",
@@ -136,7 +136,7 @@ void init_mouse_cursor8(char *mouse, char bc)
 	return;
 }
 
-void putblock8_8(char *vram, int vxsize, int pxsize,
+void putblock8_8(unsigned char *vram, int vxsize, int pxsize,
 	int pysize, int px0, int py0, char *buf, int bxsize)
 {
 	int x, y;
@@ -150,7 +150,7 @@ void putblock8_8(char *vram, int vxsize, int pxsize,
 
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
 {
-	static char closebtn[14][16] = {
+	static unsigned char closebtn[14][16] = {
 		"OOOOOOOOOOOOOOO@",
 		"OQQQQQQQQQQQQQ$@",
 		"OQQQQQQQQQQQQQ$@",

@@ -23,14 +23,17 @@ public:
 	void free();
 };
 class SHEETCTRL {
+private:
+	class MEMMAN *memman;
 public:
 	unsigned char *vram,*map;
 	int xsize,ysize,top;
 	SHEET *sheets[MAX_SHEETS];
 	SHEET sheets0[MAX_SHEETS];
-	SHEET *allocsheet();
+	SHEET *allocsheet(int xsize,int ysize,int col_inv);
+	void setmemman(class MEMMAN *memman);
 };
-struct SHEETCTRL *sheetctrl_init(struct MEMMAN *memman,unsigned char *vram,int xsize,int ysize);
+struct SHEETCTRL *sheetctrl_init(class MEMMAN *memman,unsigned char *vram,int xsize,int ysize);
 
 #ifdef __cplusplus
 }

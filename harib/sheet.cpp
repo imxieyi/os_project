@@ -3,12 +3,13 @@
 #include "include/sheet.hpp"
 
 //图层控制
-SHEETCTRL *sheetctrl_init(struct MEMMAN *memman,unsigned char *vram,int xsize,int ysize){
+SHEETCTRL *sheetctrl_init(class MEMMAN *memman,unsigned char *vram,int xsize,int ysize){
 	int i;
 	SHEETCTRL *ctl=(SHEETCTRL *)memman->alloc_4k(sizeof(SHEETCTRL));
 	if(ctl==0){
 		return 0;
 	}
+	ctl->setmemman(memman);
 	ctl->map=(unsigned char *)memman->alloc_4k(xsize*ysize);
 	if(ctl->map==0){
 		memman->free_4k(int(ctl),sizeof(SHEETCTRL));
@@ -25,17 +26,29 @@ SHEETCTRL *sheetctrl_init(struct MEMMAN *memman,unsigned char *vram,int xsize,in
 	return ctl;
 }
 
-SHEET *SHEETCTRL::allocsheet(){
-	SHEET *sht;
+SHEET *SHEETCTRL::allocsheet(int xsize,int ysize,int col_inv){
 	int i;
 	for(i=0;i<MAX_SHEETS;i++)
 		if(!(sheets0[i].flags)){
-			sht=&sheets0[i];
+			SHEET *sht=&sheets0[i];
+			sht->buf=(unsigned char *)memman->alloc_4k(xsize*ysize);
+			if(sht->buf==0){
+				return 0;
+			}
 			sht->flags=SHEET_USE;
 			sht->height=-1;
+			sht->bxsize=xsize;
+			sht->bysize=ysize;
+			sht->col_inv=col_inv;
 			return sht;
 		}
 	return 0;//无空闲图层
+}
+
+void SHEETCTRL::setmemman(class MEMMAN *memman){
+	//if(memman==0){
+		this->memman=memman;
+	//}
 }
 
 void SHEET::setbuf(unsigned char *buf,int xsize,int ysize,int col_inv){
