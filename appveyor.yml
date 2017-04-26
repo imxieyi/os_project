@@ -14,7 +14,7 @@
 
   build_script:
     - set PATH=C:\MinGW\bin;C:\msys64\usr\bin;%PATH%
-    - cd harib
+    - cd hana
     - make img
 
   test_script:
