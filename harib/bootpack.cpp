@@ -3,6 +3,7 @@
 #include "include/fifo.hpp"
 #include "include/memory.hpp"
 #include "include/sheet.hpp"
+#include "include/inputdevices.hpp"
 
 extern FIFO *keybuf;
 extern FIFO *mousebuf;
@@ -19,8 +20,8 @@ void HariMain(void)
 	io_sti();//取消CPU中断禁止，因为IDT/PIC已初始化完成
 
 	SHEETCTRL *shtctl;
-	SHEET *sht_back,*sht_mouse;
-	unsigned char *buf_back,buf_mouse[256];
+	SHEET *sht_back,*sht_mouse,*sht_win;
+	unsigned char *buf_back,buf_mouse[256],*buf_win;
 	
 	unsigned int memtotal;
 	//struct MEMMAN *memman=(struct MEMMAN *)MEMMAN_ADDR;
@@ -35,18 +36,25 @@ void HariMain(void)
 	shtctl=sheetctrl_init(memman,binfo->vram,binfo->scrnx,binfo->scrny);
 	sht_back=shtctl->allocsheet();
 	sht_mouse=shtctl->allocsheet();
+	sht_win=shtctl->allocsheet();
 	buf_back=(unsigned char *)memman->alloc_4k(binfo->scrnx*binfo->scrny);
+	buf_win=(unsigned char *)memman->alloc_4k(160*52);
 	sht_back->setbuf(buf_back,binfo->scrnx,binfo->scrny,-1);
 	sht_mouse->setbuf(buf_mouse,16,16,99);
+	sht_win->setbuf(buf_win,160,52,-1);
 	init_screen(buf_back,binfo->scrnx,binfo->scrny);
 	
 	int mx=(binfo->scrnx-16)/2,my=(binfo->scrny-28-16)/2;
 	init_mouse_cursor8(buf_mouse,99);
+
+	make_window8(buf_win,160,52,"counter");
+	sht_win->slide(80,72);
+	sht_win->updown(1);
 	
 	sht_back->slide(0,0);
 	sht_mouse->slide(mx,my);
 	sht_back->updown(0);
-	sht_mouse->updown(1);
+	sht_mouse->updown(2);
 	sprintf(s,"(%3d,%3d)",mx,my);
 	putfonts8_asc(buf_back,binfo->scrnx,0,0,COL8_FFFFFF,s);
 	sprintf(s,"mem: %dMB free:%dKB",memtotal/0x400000*4,memman->total()/1024);
@@ -65,10 +73,17 @@ void HariMain(void)
 	mousebuf=&FIFO(128,mousebuff);
 
 	unsigned char i;
+	unsigned int count;
 	for (;;) {
+		count++;
+		sprintf(s,"%010d",count);
+		boxfill8(buf_win,160,COL8_C6C6C6,40,28,119,43);
+		putfonts8_asc(buf_win,160,40,28,COL8_000000,s);
+		sht_win->refresh(40,28,120,44);
+
 		io_cli();
 		if(keybuf->status()+mousebuf->status()==0){
-			io_stihlt();
+			io_sti();
 		}else{
 			if(keybuf->status()!=0){
 				i=keybuf->get();
@@ -96,8 +111,8 @@ void HariMain(void)
 					my+=mdec.y;
 					mx=mx<0?0:mx;
 					my=my<0?0:my;
-					mx=mx>binfo->scrnx-16?binfo->scrnx-16:mx;
-					my=my>binfo->scrny-16?binfo->scrny-16:my;
+					mx=mx>binfo->scrnx-1?binfo->scrnx-1:mx;
+					my=my>binfo->scrny-1?binfo->scrny-1:my;
 					sprintf(s,"(%3d,%3d)",mx,my);
 					boxfill8(buf_back,binfo->scrnx,COL8_008484,0,0,79,15);
 					putfonts8_asc(buf_back,binfo->scrnx,0,0,COL8_FFFFFF,s);

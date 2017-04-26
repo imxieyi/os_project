@@ -7,16 +7,6 @@ extern "C"{
 
 #define ADR_BOOTINFO	0x00000ff0
 
-//键盘鼠标部分
-#define PORT_KEYDAT		0x0060
-#define PORT_KEYSTA		0x0064
-#define PORT_KEYCMD		0x0064
-#define KEYSTA_SEND_NOTREADY	0x02
-#define KEYCMD_WRITE_MODE		0x60
-#define KBC_MODE				0x47
-#define KEYCMD_SENDTO_MOUSE		0xd4
-#define MOUSECMD_ENABLE			0xf4
-
 //structures
 struct BOOTINFO{
 	char cyls,leds,vmode,reserve;
@@ -34,12 +24,6 @@ struct GATE_DESCRIPTOR {
 	short offset_low, selector;
 	char dw_count, access_right;
 	short offset_high;
-};
-
-struct MOUSE_DEC {
-	unsigned char buf[3];
-	char phase;
-	int x,y,btn;
 };
 
 //colors
@@ -82,6 +66,7 @@ void putfont8(char *vram, int xsize, int x, int y, char color, char *font);
 void putfonts8_asc(char *vram,int xsize,int x,int y,char c,unsigned char *s);
 void init_mouse_cursor8(char *mouse, char bc);
 void putblock8_8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
+void make_window8(unsigned char *buf, int xsize, int ysize, char *title);
 
 //gdtidt.c
 void init_gdtidt(void);
@@ -114,16 +99,6 @@ void inthandler27(int *esp);
 #define PIC1_ICW2		0x00a1
 #define PIC1_ICW3		0x00a1
 #define PIC1_ICW4		0x00a1
-
-//keyboard.c
-void wait_kbc_sendready(void);
-void init_keyboard(void);
-void asm_inthandler21();
-
-//mouse.c
-void enable_mouse(struct MOUSE_DEC *mdec);
-int mouse_decode(struct MOUSE_DEC *mdec,unsigned char dat);
-void asm_inthandler2c();
 
 #ifdef __cplusplus
 }

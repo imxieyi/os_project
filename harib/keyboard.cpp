@@ -1,5 +1,6 @@
 #include "include/headers.h"
 #include "include/fifo.hpp"
+#include "include/inputdevices.hpp"
 
 void wait_kbc_sendready(void){
 	//等待键盘控制电路准备完毕

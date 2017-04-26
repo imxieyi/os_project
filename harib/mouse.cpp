@@ -1,5 +1,6 @@
 #include "include/headers.h"
 #include "include/fifo.hpp"
+#include "include/inputdevices.hpp"
 
 void enable_mouse(struct MOUSE_DEC *mdec){
 	//激活鼠标
