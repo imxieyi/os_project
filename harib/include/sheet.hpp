@@ -11,10 +11,9 @@ class SHEETCTRL;
 class SHEET {
 public:
 	SHEETCTRL *sctrl;
-	unsigned char *buf;
+	class GRAPHICS *graphics;
 	int bxsize,bysize,vx0,vy0,col_inv,height,flags;//height越大越上层
 	SHEET(SHEETCTRL *ctl);
-	void setbuf(unsigned char *buf,int xsize,int ysize,int col_inv);
 	void updown(int height);
 	void refresh(int bx0,int by0,int bx1,int by1);
 	void refreshsub(int bx0,int by0,int bx1,int by1,int h0,int h1);

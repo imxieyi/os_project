@@ -1,4 +1,5 @@
 #include "include/headers.h"
+#include "include/graphics.hpp"
 
 void init_palette(void)
 {
@@ -42,7 +43,7 @@ void set_palette(int start, int end, unsigned char *rgb)
 	return;
 }
 
-void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1)
+void GRAPHICS::boxfill8(unsigned char c, int x0, int y0, int x1, int y1)
 {
 	int x, y;
 	for (y = y0; y <= y1; y++) {
@@ -52,52 +53,32 @@ void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, i
 	return;
 }
 
-void init_screen(unsigned char* vram,short xsize,short ysize){
-	
-	boxfill8(vram, xsize, COL8_008484,  0,         0,          xsize -  1, ysize - 29);
-	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
-	boxfill8(vram, xsize, COL8_FFFFFF,  0,         ysize - 27, xsize -  1, ysize - 27);
-	boxfill8(vram, xsize, COL8_C6C6C6,  0,         ysize - 26, xsize -  1, ysize -  1);
-
-	boxfill8(vram, xsize, COL8_FFFFFF,  3,         ysize - 24, 59,         ysize - 24);
-	boxfill8(vram, xsize, COL8_FFFFFF,  2,         ysize - 24,  2,         ysize -  4);
-	boxfill8(vram, xsize, COL8_848484,  3,         ysize -  4, 59,         ysize -  4);
-	boxfill8(vram, xsize, COL8_848484, 59,         ysize - 23, 59,         ysize -  5);
-	boxfill8(vram, xsize, COL8_000000,  2,         ysize -  3, 59,         ysize -  3);
-	boxfill8(vram, xsize, COL8_000000, 60,         ysize - 24, 60,         ysize -  3);
-
-	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 24, xsize -  4, ysize - 24);
-	boxfill8(vram, xsize, COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize -  4);
-	boxfill8(vram, xsize, COL8_FFFFFF, xsize - 47, ysize -  3, xsize -  4, ysize -  3);
-	boxfill8(vram, xsize, COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
+void GRAPHICS::init(unsigned char *vram,int xsize,int ysize){
+	this->vram=vram;
+	this->xsize=xsize;
+	this->ysize=ysize;
 }
 
-void putfont8(unsigned char *vram, int xsize, int x, int y, char color, char *font){
-	int i;
-	unsigned char *p, d;
-	for(i=0;i<16;i++){
-		p=vram+(y+i)*xsize+x;
-		d=font[i];
-		if((d&0x80)!=0){p[0]=color;};
-		if((d&0x40)!=0){p[1]=color;};
-		if((d&0x20)!=0){p[2]=color;};
-		if((d&0x10)!=0){p[3]=color;};
-		if((d&0x08)!=0){p[4]=color;};
-		if((d&0x04)!=0){p[5]=color;};
-		if((d&0x02)!=0){p[6]=color;};
-		if((d&0x01)!=0){p[7]=color;};
-	}
+void GRAPHICS::init_screen(){
+	boxfill8(COL8_008484,  0,         0,          xsize -  1, ysize - 29);
+	boxfill8(COL8_C6C6C6,  0,         ysize - 28, xsize -  1, ysize - 28);
+	boxfill8(COL8_FFFFFF,  0,         ysize - 27, xsize -  1, ysize - 27);
+	boxfill8(COL8_C6C6C6,  0,         ysize - 26, xsize -  1, ysize -  1);
+
+	boxfill8(COL8_FFFFFF,  3,         ysize - 24, 59,         ysize - 24);
+	boxfill8(COL8_FFFFFF,  2,         ysize - 24,  2,         ysize -  4);
+	boxfill8(COL8_848484,  3,         ysize -  4, 59,         ysize -  4);
+	boxfill8(COL8_848484, 59,         ysize - 23, 59,         ysize -  5);
+	boxfill8(COL8_000000,  2,         ysize -  3, 59,         ysize -  3);
+	boxfill8(COL8_000000, 60,         ysize - 24, 60,         ysize -  3);
+
+	boxfill8(COL8_848484, xsize - 47, ysize - 24, xsize -  4, ysize - 24);
+	boxfill8(COL8_848484, xsize - 47, ysize - 23, xsize - 47, ysize -  4);
+	boxfill8(COL8_FFFFFF, xsize - 47, ysize -  3, xsize -  4, ysize -  3);
+	boxfill8(COL8_FFFFFF, xsize -  3, ysize - 24, xsize -  3, ysize -  3);
 }
 
-void putfonts8_asc(unsigned char *vram,int xsize,int x,int y,char c,char *s){
-	extern char hankaku[4096];
-	for(;*s!=0x00;s++){
-		putfont8(vram,xsize,x,y,c,hankaku+*s*16);
-		x+=8;
-	}
-}
-
-void init_mouse_cursor8(unsigned char *mouse, char bc)
+void GRAPHICS::init_mouse_cursor8(char bc)
 /* 准备鼠标指针（16x16） */
 {
 	static unsigned char cursor[16][16] = {
@@ -123,32 +104,20 @@ void init_mouse_cursor8(unsigned char *mouse, char bc)
 	for (y = 0; y < 16; y++) {
 		for (x = 0; x < 16; x++) {
 			if (cursor[y][x] == '*') {
-				mouse[y * 16 + x] = COL8_000000;
+				vram[y * 16 + x] = COL8_000000;
 			}
 			if (cursor[y][x] == 'O') {
-				mouse[y * 16 + x] = COL8_FFFFFF;
+				vram[y * 16 + x] = COL8_FFFFFF;
 			}
 			if (cursor[y][x] == '.') {
-				mouse[y * 16 + x] = bc;
+				vram[y * 16 + x] = bc;
 			}
 		}
 	}
 	return;
 }
 
-void putblock8_8(unsigned char *vram, int vxsize, int pxsize,
-	int pysize, int px0, int py0, char *buf, int bxsize)
-{
-	int x, y;
-	for (y = 0; y < pysize; y++) {
-		for (x = 0; x < pxsize; x++) {
-			vram[(py0 + y) * vxsize + (px0 + x)] = buf[y * bxsize + x];
-		}
-	}
-	return;
-}
-
-void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
+void GRAPHICS::init_window8(char *title)
 {
 	static unsigned char closebtn[14][16] = {
 		"OOOOOOOOOOOOOOO@",
@@ -168,17 +137,17 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
 	};
 	int x, y;
 	char c;
-	boxfill8(buf, xsize, COL8_C6C6C6, 0,         0,         xsize - 1, 0        );
-	boxfill8(buf, xsize, COL8_FFFFFF, 1,         1,         xsize - 2, 1        );
-	boxfill8(buf, xsize, COL8_C6C6C6, 0,         0,         0,         ysize - 1);
-	boxfill8(buf, xsize, COL8_FFFFFF, 1,         1,         1,         ysize - 2);
-	boxfill8(buf, xsize, COL8_848484, xsize - 2, 1,         xsize - 2, ysize - 2);
-	boxfill8(buf, xsize, COL8_000000, xsize - 1, 0,         xsize - 1, ysize - 1);
-	boxfill8(buf, xsize, COL8_C6C6C6, 2,         2,         xsize - 3, ysize - 3);
-	boxfill8(buf, xsize, COL8_000084, 3,         3,         xsize - 4, 20       );
-	boxfill8(buf, xsize, COL8_848484, 1,         ysize - 2, xsize - 2, ysize - 2);
-	boxfill8(buf, xsize, COL8_000000, 0,         ysize - 1, xsize - 1, ysize - 1);
-	putfonts8_asc(buf, xsize, 24, 4, COL8_FFFFFF, title);
+	boxfill8(COL8_C6C6C6, 0,         0,         xsize - 1, 0        );
+	boxfill8(COL8_FFFFFF, 1,         1,         xsize - 2, 1        );
+	boxfill8(COL8_C6C6C6, 0,         0,         0,         ysize - 1);
+	boxfill8(COL8_FFFFFF, 1,         1,         1,         ysize - 2);
+	boxfill8(COL8_848484, xsize - 2, 1,         xsize - 2, ysize - 2);
+	boxfill8(COL8_000000, xsize - 1, 0,         xsize - 1, ysize - 1);
+	boxfill8(COL8_C6C6C6, 2,         2,         xsize - 3, ysize - 3);
+	boxfill8(COL8_000084, 3,         3,         xsize - 4, 20       );
+	boxfill8(COL8_848484, 1,         ysize - 2, xsize - 2, ysize - 2);
+	boxfill8(COL8_000000, 0,         ysize - 1, xsize - 1, ysize - 1);
+	putfonts8_asc(24, 4, COL8_FFFFFF, title);
 	for (y = 0; y < 14; y++) {
 		for (x = 0; x < 16; x++) {
 			c = closebtn[y][x];
@@ -191,7 +160,43 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
 			} else {
 				c = COL8_FFFFFF;
 			}
-			buf[(5 + y) * xsize + (xsize - 21 + x)] = c;
+			this->vram[(5 + y) * xsize + (xsize - 21 + x)] = c;
+		}
+	}
+	return;
+}
+
+void GRAPHICS::putfont8(int x, int y, char color, char *font){
+	int i;
+	unsigned char *p, d;
+	for(i=0;i<16;i++){
+		p=vram+(y+i)*xsize+x;
+		d=font[i];
+		if((d&0x80)!=0){p[0]=color;};
+		if((d&0x40)!=0){p[1]=color;};
+		if((d&0x20)!=0){p[2]=color;};
+		if((d&0x10)!=0){p[3]=color;};
+		if((d&0x08)!=0){p[4]=color;};
+		if((d&0x04)!=0){p[5]=color;};
+		if((d&0x02)!=0){p[6]=color;};
+		if((d&0x01)!=0){p[7]=color;};
+	}
+}
+
+void GRAPHICS::putfonts8_asc(int x,int y,char c,char *s){
+	extern char hankaku[4096];
+	for(;*s!=0x00;s++){
+		putfont8(x,y,c,hankaku+*s*16);
+		x+=8;
+	}
+}
+
+void GRAPHICS::putblock8_8(int pxsize, int pysize, int px0, int py0, char *buf, int bxsize)
+{
+	int x, y;
+	for (y = 0; y < pysize; y++) {
+		for (x = 0; x < pxsize; x++) {
+			vram[(py0 + y) * xsize + (px0 + x)] = buf[y * bxsize + x];
 		}
 	}
 	return;

@@ -1,5 +1,6 @@
 #include "include/headers.h"
 #include "include/memory.hpp"
+#include "include/graphics.hpp"
 #include "include/sheet.hpp"
 
 //图层控制
@@ -31,10 +32,12 @@ SHEET *SHEETCTRL::allocsheet(int xsize,int ysize,int col_inv){
 	for(i=0;i<MAX_SHEETS;i++)
 		if(!(sheets0[i].flags)){
 			SHEET *sht=&sheets0[i];
-			sht->buf=(unsigned char *)memman->alloc_4k(xsize*ysize);
-			if(sht->buf==0){
+			sht->graphics=(GRAPHICS *)memman->alloc(sizeof(GRAPHICS));
+			unsigned char *buf=(unsigned char *)memman->alloc_4k(xsize*ysize);
+			if(buf==0){
 				return 0;
 			}
+			sht->graphics->init(buf,xsize,ysize);
 			sht->flags=SHEET_USE;
 			sht->height=-1;
 			sht->bxsize=xsize;
@@ -46,17 +49,7 @@ SHEET *SHEETCTRL::allocsheet(int xsize,int ysize,int col_inv){
 }
 
 void SHEETCTRL::setmemman(class MEMMAN *memman){
-	//if(memman==0){
-		this->memman=memman;
-	//}
-}
-
-void SHEET::setbuf(unsigned char *buf,int xsize,int ysize,int col_inv){
-	this->buf=buf;
-	this->bxsize=xsize;
-	this->bysize=ysize;
-	this->col_inv=col_inv;
-	return;
+	this->memman=memman;
 }
 
 void SHEET::updown(int height){
@@ -121,7 +114,7 @@ void SHEET::refreshsub(int vx0, int vy0, int vx1, int vy1, int h0, int h1){
 	vy1=vy1>sctrl->ysize?sctrl->ysize:vy1;
 	for (h = h0; h <= h1; h++) {
 		sht = sctrl->sheets[h];
-		buf = sht->buf;
+		buf = sht->graphics->vram;
 		sid = sht - sctrl->sheets0;
 		bx0 = vx0 - sht->vx0;
 		by0 = vy0 - sht->vy0;
@@ -155,7 +148,7 @@ void SHEET::refreshmap(int vx0,int vy0,int vx1,int vy1,int h0){
 	for(h=0;h<=sctrl->top;h++){
 		sht=sctrl->sheets[h];
 		sid=sht-sctrl->sheets0;
-		buf=sht->buf;
+		buf=sht->graphics->vram;
 		bx0 = vx0 - sht->vx0;
 		by0 = vy0 - sht->vy0;
 		bx1 = vx1 - sht->vx0;
