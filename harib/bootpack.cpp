@@ -19,7 +19,7 @@ void HariMain(void)
 	struct BOOTINFO *binfo=(struct BOOTINFO *)0x0ff0;
 
 	unsigned int memtotal;
-	MEMMAN *memman=(MEMMAN*)MEMMAN_ADDR;
+	auto *memman=(MEMMAN*)MEMMAN_ADDR;
 	memtotal=memtest(0x00400000,0xbfffffff);
 	memman->free(0x00001000,0x0009e000);
 	memman->free(0x00400000,memtotal-0x00400000);
@@ -33,24 +33,21 @@ void HariMain(void)
 	io_out8(PIC0_IMR, 0xf8);//允许PIT,PIC1和键盘发送中断(11111000)
 	io_out8(PIC1_IMR, 0xef);//允许鼠标发送中断(11101111)
 
-	TIMER *timer1,*timer2,*timer3;
-	timer1=timerctrl->alloc()->init(&FIFO(memman,8),1);
-	timer2=timerctrl->alloc()->init(&FIFO(memman,8),1);
-	timer3=timerctrl->alloc()->init(&FIFO(memman,8),1);
+	auto timerfifo=FIFO(memman,8);
+	auto timer1=timerctrl->alloc()->init(&timerfifo,10);
+	auto timer2=timerctrl->alloc()->init(&timerfifo,3);
+	auto timer3=timerctrl->alloc()->init(&timerfifo,1);
 	timer1->set(1000);
 	timer2->set(300);
 	timer3->set(50);
-
-	SHEETCTRL *shtctl;
-	SHEET *sht_back,*sht_mouse,*sht_win;
 	
 	char s[15];
 
 	init_palette();
-	shtctl=sheetctrl_init(memman,binfo->vram,binfo->scrnx,binfo->scrny);
-	sht_back=shtctl->allocsheet(binfo->scrnx,binfo->scrny,-1);
-	sht_mouse=shtctl->allocsheet(16,16,99);
-	sht_win=shtctl->allocsheet(160,52,-1);
+	auto shtctl=sheetctrl_init(memman,binfo->vram,binfo->scrnx,binfo->scrny);
+	auto sht_back=shtctl->allocsheet(binfo->scrnx,binfo->scrny,-1);
+	auto sht_mouse=shtctl->allocsheet(16,16,99);
+	auto sht_win=shtctl->allocsheet(160,52,-1);
 	sht_back->graphics->init_screen();
 	
 	int mx=(binfo->scrnx-16)/2,my=(binfo->scrny-28-16)/2;
@@ -85,38 +82,35 @@ void HariMain(void)
 		sht_win->refresh(40,28,120,44);
 
 		io_cli();
-		if(timer1->fifo->status()+timer2->fifo->status()+timer3->fifo->status()+keybuf->status()+mousebuf->status()==0){
+		if(timerfifo.status()+keybuf->status()+mousebuf->status()==0){
 			io_stihlt();
 		}else{
-			if(timer1->fifo->status()!=0){
-				i=timer1->fifo->get();
+			if(timerfifo.status()!=0){
+				//i=timerfifo.get();
+				i=timerfifo.get();
 				io_sti();
-				sht_back->graphics->putfonts8_asc(0,64,COL8_FFFFFF,"10[sec]");
-				sht_back->refresh(0,64,56,80);
-			} else if(timer2->fifo->status()!=0){
-				i=timer2->fifo->get();
-				io_sti();
-				sht_back->graphics->putfonts8_asc(0,80,COL8_FFFFFF,"3[sec]");
-				sht_back->refresh(0,80,48,96);
-			} else if(timer3->fifo->status()!=0){
-				i=timer3->fifo->get();
-				io_sti();
-				if(i!=0){
-					timer3->init(0);
-					sht_back->graphics->boxfill8(COL8_FFFFFF,8,96,15,111);
+				if(i==10){
+					sht_back->graphics->putfonts8_asc(0,64,COL8_FFFFFF,"10[sec]");
+					sht_back->refresh(0,64,56,80);
+				} else if(i==3){
+					sht_back->graphics->putfonts8_asc(0,80,COL8_FFFFFF,"3[sec]");
+					sht_back->refresh(0,80,48,96);
 				} else {
-					timer3->init(1);
-					sht_back->graphics->boxfill8(COL8_008484,8,96,15,111);
+					if(i!=0){
+						timer3->setdata(0);
+						sht_back->graphics->boxfill8(COL8_FFFFFF,8,96,15,111);
+					} else {
+						timer3->setdata(1);
+						sht_back->graphics->boxfill8(COL8_008484,8,96,15,111);
+					}
+					timer3->set(50);
+					sht_back->refresh(8,96,16,112);
 				}
-				timer3->set(50);
-				sht_back->refresh(8,96,16,112);
 			} else if(keybuf->status()!=0){
 				i=keybuf->get();
 				io_sti();
 				sprintf(s,"%02X",i);
-				sht_back->graphics->boxfill8(COL8_008484,0,16,15,31);
-				sht_back->graphics->putfonts8_asc(0,16,COL8_FFFFFF,s);
-				sht_back->refresh(0,16,16,32);
+				sht_back->putstring(0,16,COL8_FFFFFF,COL8_008484,s);
 			} else if(mousebuf->status()!=0){
 				i=mousebuf->get();
 				io_sti();
@@ -128,9 +122,7 @@ void HariMain(void)
 						s[3]='R';
 					if(mdec.btn&0x04)
 						s[2]='C';
-					sht_back->graphics->boxfill8(COL8_008484,32,16,32+15*8-1,31);
-					sht_back->graphics->putfonts8_asc(32,16,COL8_FFFFFF,s);
-					sht_back->refresh(32,16,32+15*8,32);
+					sht_back->putstring(32,16,COL8_FFFFFF,COL8_008484,s);
 					//移动鼠标指针
 					mx+=mdec.x;
 					my+=mdec.y;
@@ -139,9 +131,7 @@ void HariMain(void)
 					mx=mx>binfo->scrnx-1?binfo->scrnx-1:mx;
 					my=my>binfo->scrny-1?binfo->scrny-1:my;
 					sprintf(s,"(%3d,%3d)",mx,my);
-					sht_back->graphics->boxfill8(COL8_008484,0,0,79,15);
-					sht_back->graphics->putfonts8_asc(0,0,COL8_FFFFFF,s);
-					sht_back->refresh(0,0,80,16);
+					sht_back->putstring(0,0,COL8_FFFFFF,COL8_008484,s);
 					sht_mouse->slide(mx,my);
 				}
 			}

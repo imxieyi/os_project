@@ -67,17 +67,16 @@ void TIMER::push(){
 
 void TIMER::free(){
 	flag=FREE;
-	fifo->remove();
 	return;
 }
 
-TIMER *TIMER::init(class FIFO *fifo,unsigned int data){
+TIMER *TIMER::init(FIFO *fifo,unsigned int data){
 	this->fifo=fifo;
 	this->data=data;
 	return this;
 }
 
-void TIMER::init(unsigned int data){
+void TIMER::setdata(unsigned int data){
 	this->data=data;
 }
 

@@ -3,7 +3,7 @@
 
 FIFO::FIFO(MEMMAN *memman,int size){
 	this->size=size;
-	this->memman=memman;
+	memman=memman;
 	buf=(unsigned char *)memman->alloc(size);
 	free=size;
 	flags=0;
@@ -18,27 +18,27 @@ void FIFO::remove(){
 }
 
 int FIFO::put(unsigned char data){
-	if(this->free==0){
-		this->flags|=FLAGS_OVERRUN;
+	if(free==0){
+		flags|=FLAGS_OVERRUN;
 		return -1;
 	}
-	this->buf[this->w]=data;
-	this->w=(this->w+1)%this->size;
-	this->free--;
+	buf[w]=data;
+	w=(w+1)%size;
+	free--;
 	return 0;
 }
 
 int FIFO::get(){
 	int data;
-	if(this->free==this->size){
+	if(free==size){
 		return -1;
 	}
-	data=this->buf[this->r];
-	this->r=(this->r+1)%this->size;
-	this->free++;
+	data=buf[r];
+	r=(r+1)%size;
+	free++;
 	return data;
 }
 
 int FIFO::status(){
-	return this->size-this->free;
+	return size-free;
 }

@@ -19,8 +19,8 @@ public:
 	void set(unsigned int timeout);
 	void push();
 	void free();
-	TIMER *init(class FIFO *fifo,unsigned int data);
-	void init(unsigned int data);
+	TIMER *init(FIFO *fifo,unsigned int data);
+	void setdata(unsigned int data);
 };
 class TIMERCTRL {
 public:
