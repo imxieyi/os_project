@@ -1,4 +1,4 @@
-; haribote-ipl
+; hanaos-ipl
 ; TAB=4
 
 CYLS	EQU		10				; どこまで読み込むか
@@ -9,7 +9,7 @@ CYLS	EQU		10				; どこまで読み込むか
 
 		JMP		entry
 		DB		0x90
-		DB		"HARIBOTE"		; ブートセクタの名前を自由に書いてよい（8バイト）
+		DB		"HANA    "		; ブートセクタの名前を自由に書いてよい（8バイト）
 		DW		512				; 1セクタの大きさ（512にしなければいけない）
 		DB		1				; クラスタの大きさ（1セクタにしなければいけない）
 		DW		1				; FATがどこから始まるか（普通は1セクタ目からにする）
@@ -24,7 +24,7 @@ CYLS	EQU		10				; どこまで読み込むか
 		DD		2880			; このドライブ大きさをもう一度書く
 		DB		0,0,0x29		; よくわからないけどこの値にしておくといいらしい
 		DD		0xffffffff		; たぶんボリュームシリアル番号
-		DB		"HARIBOTEOS "	; ディスクの名前（11バイト）
+		DB		"HANAOS     "	; ディスクの名前（11バイト）
 		DB		"FAT12   "		; フォーマットの名前（8バイト）
 		RESB	18				; とりあえず18バイトあけておく
 
@@ -75,7 +75,7 @@ next:
 		CMP		CH,CYLS
 		JB		readloop		; CH < CYLS だったらreadloopへ
 
-; 読み終わったのでharibote.sysを実行だ！
+; 読み終わったのでhana.sysを実行だ！
 
 		MOV		[0x0ff0],CH		; IPLがどこまで読んだのかをメモ
 		JMP		0xc200

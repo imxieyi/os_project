@@ -1,5 +1,4 @@
 TOOLPATH = ../tolset/z_tools/
-INCPATH  = ../tolset/z_tools/haribote/
 
 OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj \
 	 build/gdtidt.obj build/interrupt.obj build/fifo.obj build/keyboard.obj build/mouse.obj \
@@ -7,13 +6,13 @@ OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/gr
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
-CXX      = g++ -I$(INCPATH) -I. -I./include -std=gnu++11 -Wall -Wextra -nostdlib -nostdinc -nostartfiles -nodefaultlibs -fno-builtin -c -fno-rtti -fpermissive -fno-exceptions -fpic
+CXX      = g++ -I./depends -I. -I./include -std=gnu++11 -Wall -Wextra -nostdlib -nostdinc -nostartfiles -nodefaultlibs -fno-builtin -c -fno-rtti -fpermissive -fno-exceptions -fpic
 # -fno-stack-check -fno-stack-protector -mno-stack-arg-probe 这些参数即使加上也不能使用相应的特性
 OBJ2BIM  = $(TOOLPATH)obj2bim.exe
 MAKEFONT = $(TOOLPATH)makefont.exe
 BIN2OBJ  = $(TOOLPATH)bin2obj.exe
 BIM2HRB  = $(TOOLPATH)bim2hrb.exe
-RULEFILE = $(TOOLPATH)haribote/haribote.rul
+RULEFILE = depends/hanaos.rul
 EDIMG    = $(TOOLPATH)edimg.exe
 #COPY     = cmd /c copy /y
 #DEL      = cmd /c del /f
@@ -51,28 +50,28 @@ bootpack.bim : bootpack.obj naskfunc.obj hankaku.obj graphics.obj gdtidt.obj tim
 		$(OBJS_BOOTPACK)
 # 3MB+64KB=3136KB
 
-bootpack.hrb : bootpack.bim Makefile
-	$(BIM2HRB) build/bootpack.bim build/bootpack.hrb 0
+bootpack.hana : bootpack.bim Makefile
+	$(BIM2HRB) build/bootpack.bim build/bootpack.hana 0
 
-haribote.sys : asmhead.bin bootpack.hrb Makefile
-#	cmd /c copy /B build\asmhead.bin+build\bootpack.hrb build\haribote.sys
-	cat build/asmhead.bin build/bootpack.hrb > build/haribote.sys
+hanaos.sys : asmhead.bin bootpack.hana Makefile
+#	cmd /c copy /B build\asmhead.bin+build\bootpack.hana build\hanaos.sys
+	cat build/asmhead.bin build/bootpack.hana > build/hanaos.sys
 
-haribote.img : ipl.bin haribote.sys Makefile
+hanaos.img : ipl.bin hanaos.sys Makefile
 	$(EDIMG)   imgin:$(TOOLPATH)fdimg0at.tek \
 		wbinimg src:build/ipl.bin len:512 from:0 to:0 \
-		copy from:build/haribote.sys to:@: \
-		imgout:build/haribote.img
+		copy from:build/hanaos.sys to:@: \
+		imgout:build/hanaos.img
 
 # コマンド
 
 img :
-	$(MAKE) haribote.img
+	$(MAKE) hanaos.img
 
 run :
 	$(MAKE) img
-	$(COPY) build/haribote.img $(TOOLPATH)qemu/fdimage0.bin
-#	$(COPY) build\haribote.img ..\tolset\z_tools\qemu\fdimage0.bin
+	$(COPY) build/hanaos.img $(TOOLPATH)qemu/fdimage0.bin
+#	$(COPY) build\hanaos.img ..\tolset\z_tools\qemu\fdimage0.bin
 	$(MAKE) -C $(TOOLPATH)qemu
 
 clean :
@@ -80,4 +79,4 @@ clean :
 
 src_only :
 	$(MAKE) clean
-	-$(DEL) haribote.img
+	-$(DEL) hanaos.img

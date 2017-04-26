@@ -14,7 +14,7 @@ extern TIMERCTRL *timerctrl;
 #ifdef __cplusplus
 extern "C"{
 #endif
-void HariMain(void)
+void HanaMain(void)
 {
 	struct BOOTINFO *binfo=(struct BOOTINFO *)0x0ff0;
 
