@@ -9,11 +9,13 @@ extern "C"{
 class FIFO {
 private:
 	unsigned char *buf;
+	class MEMMAN *memman;
 	int r,w,size,free,flags;
 public:
 	FIFO(class MEMMAN *memman,int size);
 	int put(unsigned char data);
 	int get();
+	void remove();
 	int status();
 };
 

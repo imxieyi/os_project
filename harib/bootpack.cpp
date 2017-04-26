@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "include/headers.h"
+#include "include/timer.hpp"
 #include "include/fifo.hpp"
 #include "include/memory.hpp"
 #include "include/graphics.hpp"
@@ -8,6 +9,7 @@
 
 extern FIFO *keybuf;
 extern FIFO *mousebuf;
+extern TIMERCTRL *timerctrl;
 
 #ifdef __cplusplus
 extern "C"{
@@ -16,18 +18,32 @@ void HariMain(void)
 {
 	struct BOOTINFO *binfo=(struct BOOTINFO *)0x0ff0;
 
-	init_gdtidt();
-	init_pic();
-	io_sti();//取消CPU中断禁止，因为IDT/PIC已初始化完成
-
-	SHEETCTRL *shtctl;
-	SHEET *sht_back,*sht_mouse,*sht_win;
-	
 	unsigned int memtotal;
 	MEMMAN *memman=(MEMMAN*)MEMMAN_ADDR;
 	memtotal=memtest(0x00400000,0xbfffffff);
 	memman->free(0x00001000,0x0009e000);
 	memman->free(0x00400000,memtotal-0x00400000);
+
+	timerctrl=(TIMERCTRL*)memman->alloc(sizeof(TIMERCTRL));
+
+	init_gdtidt();
+	init_pic();
+	io_sti();//取消CPU中断禁止，因为IDT/PIC已初始化完成
+	init_pit();//定时器
+	io_out8(PIC0_IMR, 0xf8);//允许PIT,PIC1和键盘发送中断(11111000)
+	io_out8(PIC1_IMR, 0xef);//允许鼠标发送中断(11101111)
+
+	TIMER *timer1,*timer2,*timer3;
+	timer1=timerctrl->alloc()->init(&FIFO(memman,8),1);
+	timer2=timerctrl->alloc()->init(&FIFO(memman,8),1);
+	timer3=timerctrl->alloc()->init(&FIFO(memman,8),1);
+	timer1->set(1000);
+	timer2->set(300);
+	timer3->set(50);
+
+	SHEETCTRL *shtctl;
+	SHEET *sht_back,*sht_mouse,*sht_win;
+	
 	char s[15];
 
 	init_palette();
@@ -40,7 +56,7 @@ void HariMain(void)
 	int mx=(binfo->scrnx-16)/2,my=(binfo->scrny-28-16)/2;
 	sht_mouse->graphics->init_mouse_cursor8(99);
 
-	sht_win->graphics->init_window8("counter");
+	sht_win->graphics->init_window8("timer");
 	sht_win->slide(80,72);
 	sht_win->updown(1);
 	
@@ -57,26 +73,44 @@ void HariMain(void)
 	init_keyboard();
 	struct MOUSE_DEC mdec;
 	enable_mouse(&mdec);
-	io_out8(PIC0_IMR, 0xf9);//允许PIC1和键盘发送中断(11111001)
-	io_out8(PIC1_IMR, 0xef);//允许鼠标发送中断(11101111)
 	
 	keybuf=&FIFO(memman,32);
 	mousebuf=&FIFO(memman,128);
 
 	unsigned char i;
-	unsigned int count;
 	for (;;) {
-		count++;
-		sprintf(s,"%010d",count);
+		sprintf(s,"%010d",timerctrl->count);
 		sht_win->graphics->boxfill8(COL8_C6C6C6,40,28,119,43);
 		sht_win->graphics->putfonts8_asc(40,28,COL8_000000,s);
 		sht_win->refresh(40,28,120,44);
 
 		io_cli();
-		if(keybuf->status()+mousebuf->status()==0){
-			io_sti();
+		if(timer1->fifo->status()+timer2->fifo->status()+timer3->fifo->status()+keybuf->status()+mousebuf->status()==0){
+			io_stihlt();
 		}else{
-			if(keybuf->status()!=0){
+			if(timer1->fifo->status()!=0){
+				i=timer1->fifo->get();
+				io_sti();
+				sht_back->graphics->putfonts8_asc(0,64,COL8_FFFFFF,"10[sec]");
+				sht_back->refresh(0,64,56,80);
+			} else if(timer2->fifo->status()!=0){
+				i=timer2->fifo->get();
+				io_sti();
+				sht_back->graphics->putfonts8_asc(0,80,COL8_FFFFFF,"3[sec]");
+				sht_back->refresh(0,80,48,96);
+			} else if(timer3->fifo->status()!=0){
+				i=timer3->fifo->get();
+				io_sti();
+				if(i!=0){
+					timer3->init(0);
+					sht_back->graphics->boxfill8(COL8_FFFFFF,8,96,15,111);
+				} else {
+					timer3->init(1);
+					sht_back->graphics->boxfill8(COL8_008484,8,96,15,111);
+				}
+				timer3->set(50);
+				sht_back->refresh(8,96,16,112);
+			} else if(keybuf->status()!=0){
 				i=keybuf->get();
 				io_sti();
 				sprintf(s,"%02X",i);

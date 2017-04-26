@@ -3,11 +3,17 @@
 
 FIFO::FIFO(MEMMAN *memman,int size){
 	this->size=size;
+	this->memman=memman;
 	buf=(unsigned char *)memman->alloc(size);
 	free=size;
 	flags=0;
 	w=0;
 	r=0;
+	return;
+}
+
+void FIFO::remove(){
+	memman->free((unsigned int)buf,size);
 	return;
 }
 
