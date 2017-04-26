@@ -4,9 +4,11 @@
 
 Author: Edward FANG, Y.M. PENG, Yi XIE.
 
-先挖个坑hhhh 
+先挖个坑hhhh
 
 4-24 开始填坑gg
+
+已转向C++和C混合模式（唯一的好处也就是面向对象了）。
 
 Reference:
 - ISO File attached to the original book (Japanese):
