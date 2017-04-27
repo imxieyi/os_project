@@ -33,7 +33,7 @@ SHEET *SHEETCTRL::allocsheet(int xsize,int ysize,int col_inv){
 	for(i=0;i<MAX_SHEETS;i++)
 		if(!(sheets0[i].flags)){
 			SHEET *sht=&sheets0[i];
-			sht->graphics=(GRAPHICS *)memman->alloc(sizeof(GRAPHICS));
+			sht->graphics=(GRAPHICS *)memman->alloc_4k(sizeof(GRAPHICS));
 			unsigned char *buf=(unsigned char *)memman->alloc_4k(xsize*ysize);
 			if(buf==0){
 				return 0;

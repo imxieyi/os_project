@@ -8,7 +8,9 @@ Author: Edward FANG, Y.M. PENG, Yi XIE.
 
 4-24 开始填坑gg
 
-已转向C++[11(伪)]和C混合模式（唯一的好处也就是面向对象了）。
+已转向C++[14(伪)]和C混合模式（唯一的好处也就是面向对象了）。
+
+4-27 尝试脱离tolset下的工具编译，然而经过一下午努力最终弃坑。
 
 Reference:
 - ISO File attached to the original book (Japanese):

@@ -5,6 +5,8 @@
 extern "C"{
 #endif
 
+#include "fifo.hpp"
+
 //键盘鼠标部分
 #define PORT_KEYDAT		0x0060
 #define PORT_KEYSTA		0x0064
@@ -17,7 +19,7 @@ extern "C"{
 
 //keyboard.c
 void wait_kbc_sendready(void);
-void init_keyboard(void);
+void init_keyboard(FIFO *fifo,int data0);
 void asm_inthandler21();
 
 //mouse.c
@@ -26,7 +28,7 @@ struct MOUSE_DEC {
 	char phase;
 	int x,y,btn;
 };
-void enable_mouse(struct MOUSE_DEC *mdec);
+void enable_mouse(FIFO *fifo,int data0,struct MOUSE_DEC *mdec);
 int mouse_decode(struct MOUSE_DEC *mdec,unsigned char dat);
 void asm_inthandler2c();
 

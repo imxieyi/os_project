@@ -1,10 +1,10 @@
 #include "include/fifo.hpp"
 #include "include/memory.hpp"
 
-FIFO::FIFO(MEMMAN *memman,int size){
+void FIFO::init(MEMMAN *memman,int size){
 	this->size=size;
-	memman=memman;
-	buf=(unsigned char *)memman->alloc(size);
+	this->memman=memman;
+	buf=(int *)memman->alloc(size*sizeof(int));
 	free=size;
 	flags=0;
 	w=0;
@@ -13,11 +13,11 @@ FIFO::FIFO(MEMMAN *memman,int size){
 }
 
 void FIFO::remove(){
-	memman->free((unsigned int)buf,size);
+	memman->free((unsigned int)buf,size*4);
 	return;
 }
 
-int FIFO::put(unsigned char data){
+int FIFO::put(int data){
 	if(free==0){
 		flags|=FLAGS_OVERRUN;
 		return -1;

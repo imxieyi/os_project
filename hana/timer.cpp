@@ -70,13 +70,13 @@ void TIMER::free(){
 	return;
 }
 
-TIMER *TIMER::init(FIFO *fifo,unsigned int data){
+TIMER *TIMER::init(FIFO *fifo,int data){
 	this->fifo=fifo;
 	this->data=data;
 	return this;
 }
 
-void TIMER::setdata(unsigned int data){
+void TIMER::setdata(int data){
 	this->data=data;
 }
 

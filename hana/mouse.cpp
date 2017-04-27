@@ -2,14 +2,18 @@
 #include "include/fifo.hpp"
 #include "include/inputdevices.hpp"
 
-void enable_mouse(struct MOUSE_DEC *mdec){
+FIFO *mousefifo;
+int mousedata0;
+void enable_mouse(FIFO *fifo,int data0,struct MOUSE_DEC *mdec){
 	//激活鼠标
+	mousefifo=fifo;
+	mousedata0=data0;
 	wait_kbc_sendready();
 	io_out8(PORT_KEYCMD,KEYCMD_SENDTO_MOUSE);
 	wait_kbc_sendready();
 	io_out8(PORT_KEYDAT,MOUSECMD_ENABLE);
 	//如果成功，键盘控制器返回ACK(0xfa)
-	mdec->phase=-1;//等待0xfa
+	mdec->phase=0;//等待0xfa
 	return;
 }
 
@@ -36,13 +40,12 @@ int mouse_decode(struct MOUSE_DEC *mdec,unsigned char dat){
 	return 0;
 }
 
-FIFO *mousebuf;
 //来自PS/2鼠标的中断
 void inthandler2c(int *esp){
-	unsigned char data;
+	int data;
 	io_out8(PIC1_OCW2,0x64);
 	io_out8(PIC0_OCW2,0x62);
 	data=io_in8(PORT_KEYDAT);
-	mousebuf->put(data);
+	mousefifo->put(data+mousedata0);
 	return;
 }

@@ -6,7 +6,7 @@ OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/gr
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
-CXX      = g++ -I./depends -I. -I./include -std=gnu++11 -Wall -Wextra -nostdlib -nostdinc -nostartfiles -nodefaultlibs -fno-builtin -c -fno-rtti -fpermissive -fno-exceptions -fpic
+CXX      = g++ -I./depends -I. -I./include -std=gnu++14 -Wall -Wextra -nostdlib -nostdinc -nostartfiles -nodefaultlibs -fno-builtin -c -fno-rtti -fpermissive -fno-exceptions -fpic
 # -fno-stack-check -fno-stack-protector -mno-stack-arg-probe 这些参数即使加上也不能使用相应的特性
 OBJ2BIM  = $(TOOLPATH)obj2bim.exe
 MAKEFONT = $(TOOLPATH)makefont.exe

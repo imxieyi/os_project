@@ -5,22 +5,24 @@
 extern "C"{
 #endif
 
+#include "fifo.hpp"
+
 #define PIT_CTRL	0x0043
 #define PIT_CNT0	0x0040
 #define MAX_TIMER	500
 enum TIMER_FLAG {FREE,ALLOC,USING};
 class TIMER {
 private:
-	unsigned char data;
+	int data;
 public:
-	class FIFO *fifo;
+	FIFO *fifo;
 	TIMER_FLAG flag;
 	unsigned int timeout;
 	void set(unsigned int timeout);
 	void push();
 	void free();
-	TIMER *init(FIFO *fifo,unsigned int data);
-	void setdata(unsigned int data);
+	TIMER *init(FIFO *fifo,int data);
+	void setdata(int data);
 };
 class TIMERCTRL {
 public:

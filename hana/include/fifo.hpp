@@ -11,9 +11,9 @@ private:
 	class MEMMAN *memman;
 	int r,w,size,free,flags;
 public:
-	unsigned char *buf;
-	FIFO(class MEMMAN *memman,int size);
-	int put(unsigned char data);
+	int *buf;
+	void init(class MEMMAN *memman,int size);
+	int put(int data);
 	int get();
 	void remove();
 	int status();

@@ -160,7 +160,7 @@ void GRAPHICS::init_window8(char *title)
 			} else {
 				c = COL8_FFFFFF;
 			}
-			this->vram[(5 + y) * xsize + (xsize - 21 + x)] = c;
+			vram[(5 + y) * xsize + (xsize - 21 + x)] = c;
 		}
 	}
 	return;

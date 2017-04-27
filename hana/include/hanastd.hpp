@@ -3,10 +3,10 @@
 
 namespace hanastd {
 	template <typename T>
-	int strlen(T const& str){
-		auto i=&str;
+	auto strlen(T str){
+		auto i=str;
 		for(;*i!=0;i++);
-		return i-&str+1;
+		return i-str+1;
 	}
 }
 

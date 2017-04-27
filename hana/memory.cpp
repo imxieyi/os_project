@@ -11,8 +11,8 @@ MEMMAN::MEMMAN(){
 
 unsigned int MEMMAN::total(){
 	unsigned int i,t=0;
-	for(i=0;i<this->frees;i++)
-		t+=this->freeinfo[i].size;
+	for(i=0;i<frees;i++)
+		t+=freeinfo[i].size;
 	return t;
 }
 
