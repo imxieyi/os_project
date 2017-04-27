@@ -1,4 +1,5 @@
 #include "include/headers.h"
+#include "include/hanastd.hpp"
 #include "include/memory.hpp"
 #include "include/graphics.hpp"
 #include "include/sheet.hpp"
@@ -182,14 +183,8 @@ void SHEET::slide(int vx0,int vy0){
 	return;
 }
 
-int strlen(char *s){
-	for(int i=0;;i++)
-		if(*(s+i)==0)
-			return i+1;
-}
-
 void SHEET::putstring(int x,int y,int c,int b,char *s){
-	int l=strlen(s)-1;
+	int l=hanastd::strlen(s)-1;
 	graphics->boxfill8(b,x,y,x+l*8-1,y+15);
 	graphics->putfonts8_asc(x,y,c,s);
 	refresh(x,y,x+l*8,y+16);

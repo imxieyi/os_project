@@ -53,6 +53,7 @@ Temporary Items
 
 # Intermediate files
 *.hrb
+*.hana
 *.lst
 *.map
 *.obj

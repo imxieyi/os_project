@@ -2,7 +2,7 @@ TOOLPATH = ../tolset/z_tools/
 
 OBJS_BOOTPACK = build/bootpack.obj build/naskfunc.obj build/hankaku.obj build/graphics.obj \
 	 build/gdtidt.obj build/interrupt.obj build/fifo.obj build/keyboard.obj build/mouse.obj \
-	 build/memory.obj build/sheet.obj build/timer.obj
+	 build/memory.obj build/sheet.obj build/timer.obj build/hanastd.obj
 
 MAKE     = $(TOOLPATH)make.exe -r
 NASK     = $(TOOLPATH)nask.exe
@@ -44,7 +44,7 @@ hankaku.bin : hankaku.txt Makefile
 hankaku.obj : hankaku.bin Makefile
 	$(BIN2OBJ) build/hankaku.bin build/hankaku.obj _hankaku
 
-bootpack.bim : bootpack.obj naskfunc.obj hankaku.obj graphics.obj gdtidt.obj timer.obj \
+bootpack.bim : bootpack.obj naskfunc.obj hankaku.obj graphics.obj gdtidt.obj timer.obj hanastd.obj \
 			   interrupt.obj fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj Makefile
 	$(OBJ2BIM) @$(RULEFILE) out:build/bootpack.bim stack:3136k map:build/bootpack.map \
 		$(OBJS_BOOTPACK)
